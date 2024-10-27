@@ -51,44 +51,49 @@ public class NativeBridge {
     }
 
     public static synchronized void initializeOnce() {
-        // 1. Get the page size.
-        long pageSize = getPageSize();
-        // 2. Prepare the trampoline.
-        ITrampolineCreator creator = TrampolineCreatorFactory.create();
-        TrampolineInfo trampoline = creator.generateTrampoline((int) pageSize);
-        // 3. Allocate a memory region for the trampoline.
-        final int MAP_ANONYMOUS = 0x20;
-        long address;
-        try {
-            address = Os.mmap(0, pageSize,
-                    OsConstants.PROT_READ | OsConstants.PROT_WRITE | OsConstants.PROT_EXEC,
-                    OsConstants.MAP_PRIVATE | MAP_ANONYMOUS, null, 0);
-        } catch (ErrnoException e) {
-            if (e.errno == OsConstants.EACCES) {
-                throw new UnsupportedOperationException("mmap failed with EACCES. Please check SELinux policy for execmem permission.");
+        if (!sNativeMethodRegistered) {
+            // 1. Get the page size.
+            long pageSize = getPageSize();
+            // 2. Prepare the trampoline.
+            ITrampolineCreator creator = TrampolineCreatorFactory.create();
+            TrampolineInfo trampoline = creator.generateTrampoline((int) pageSize);
+            // 3. Allocate a memory region for the trampoline.
+            final int MAP_ANONYMOUS = 0x20;
+            long address;
+            try {
+                address = Os.mmap(0, pageSize,
+                        OsConstants.PROT_READ | OsConstants.PROT_WRITE | OsConstants.PROT_EXEC,
+                        OsConstants.MAP_PRIVATE | MAP_ANONYMOUS, null, 0);
+            } catch (ErrnoException e) {
+                if (e.errno == OsConstants.EACCES) {
+                    throw new UnsupportedOperationException("mmap failed with EACCES. Please check SELinux policy for execmem permission.");
+                }
+                // I have no idea what happened.
+                throw ReflectHelper.unsafeThrow(e);
             }
-            // I have no idea what happened.
-            throw ReflectHelper.unsafeThrow(e);
+            // 4. Write the trampoline to the memory region.
+            Memory.pokeByteArray(address, trampoline.trampolineCode, 0, trampoline.trampolineCode.length);
+            // 5. Register the native method.
+            for (Map.Entry<Method, Integer> methods : trampoline.nativeEntryOffsetMap.entrySet()) {
+                Method method = methods.getKey();
+                int offset = methods.getValue();
+                long function = address + (long) offset;
+                ArtMethodHelper.registerNativeMethod(method, function);
+            }
+            sTrampolineBase = address;
+            sNativeMethodRegistered = true;
         }
-        // 4. Write the trampoline to the memory region.
-        Memory.pokeByteArray(address, trampoline.trampolineCode, 0, trampoline.trampolineCode.length);
-        // 5. Register the native method.
-        for (Map.Entry<Method, Integer> methods : trampoline.nativeEntryOffsetMap.entrySet()) {
-            Method method = methods.getKey();
-            int offset = methods.getValue();
-            long function = address + (long) offset;
-            ArtMethodHelper.registerNativeMethod(method, function);
-        }
-        sTrampolineBase = address;
-        sNativeMethodRegistered = true;
-        // 6. Set the memory region to read-only.
-        {
-            long rc = creator.mprotect(address, pageSize, OsConstants.PROT_READ | OsConstants.PROT_EXEC);
+        if (!sTrampolineSetReadOnly) {
+            // 6. Set the memory region to read-only.
+            long pageSize = getPageSize();
+            ITrampolineCreator creator = TrampolineCreatorFactory.create();
+            TrampolineInfo trampoline = creator.generateTrampoline((int) pageSize);
+            long rc = creator.mprotect(sTrampolineBase, pageSize, OsConstants.PROT_READ | OsConstants.PROT_EXEC);
             if (Syscall.isError(rc)) {
                 throw new AssertionError("mprotect failed with errno: " + -rc);
             }
+            sTrampolineSetReadOnly = true;
         }
-        sTrampolineSetReadOnly = true;
         // Done.
     }
 }
