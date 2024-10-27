@@ -46,6 +46,6 @@ plugins {
 rootProject.name = "LibcoreSyscall"
 
 include(
-    ":libcore-syscall",
+    ":core-syscall",
     ":hiddenapi-stub",
 )

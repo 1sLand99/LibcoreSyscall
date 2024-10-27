@@ -7,6 +7,7 @@ lifecycle = "2.8.6"
 materialDialog = "3.3.0"
 sealedEnum = "0.7.0"
 protobuf = "4.28.2"
+compileSdk = "34"
 
 [libraries]
 appcenter-analytics = { module = "com.microsoft.appcenter:appcenter-analytics", version.ref = "appCenter" }
