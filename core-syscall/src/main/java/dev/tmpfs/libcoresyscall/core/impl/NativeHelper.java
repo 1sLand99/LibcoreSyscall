@@ -136,11 +136,11 @@ public class NativeHelper {
     }
 
     public static boolean is64Bit(int isa) {
-        return (isa & 0xffff) == ELF_CLASS_64;
+        return (isa >> 16) == ELF_CLASS_64;
     }
 
     public static boolean is32Bit(int isa) {
-        return (isa & 0xffff) == ELF_CLASS_32;
+        return (isa >> 16) == ELF_CLASS_32;
     }
 
     public static boolean isCurrentRuntime64Bit() {

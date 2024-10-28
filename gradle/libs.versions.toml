@@ -7,7 +7,7 @@ lifecycle = "2.8.6"
 materialDialog = "3.3.0"
 sealedEnum = "0.7.0"
 protobuf = "4.28.2"
-compileSdk = "34"
+compileSdk = "35"
 
 [libraries]
 appcenter-analytics = { module = "com.microsoft.appcenter:appcenter-analytics", version.ref = "appCenter" }
@@ -53,7 +53,9 @@ google-guava = { module = "com.google.guava:guava", version = "33.3.1-android" }
 changelog = { id = "org.jetbrains.changelog", version = "2.2.1" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version = "11.2.3" }
 protobuf = { id = "com.google.protobuf", version = "0.9.4" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }

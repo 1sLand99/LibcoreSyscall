@@ -48,4 +48,5 @@ rootProject.name = "LibcoreSyscall"
 include(
     ":core-syscall",
     ":hiddenapi-stub",
+    ":demo-app",
 )
