@@ -193,8 +193,8 @@ public class ArtMethodHelper {
         }
         if (!NativeHelper.isCurrentRuntime64Bit()) {
             // check overflow
-            if (address != ((long) (int) address)) {
-                throw new IllegalArgumentException("address overflow: " + address);
+            if ((address & 0xFFFFFFFF00000000L) != 0) {
+                throw new IllegalArgumentException("address overflow in 32-bit mode: " + Long.toHexString(address));
             }
         }
         try {
