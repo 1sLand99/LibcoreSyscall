@@ -7,8 +7,8 @@ public class ReflectHelper {
     private ReflectHelper() {
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends Throwable> AssertionError unsafeThrowImpl(Throwable t) throws T {
-        //noinspection unchecked
         throw (T) t;
     }
 

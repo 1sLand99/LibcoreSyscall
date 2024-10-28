@@ -146,29 +146,30 @@ public class ArtMethodHelper {
             // For Android 6.0+/SDK23+, ArtMethod is no longer a mirror object.
             // We need to calculate the offset of the art::ArtMethod::entry_point_from_jni_ field.
             // See https://github.com/canyie/pine/blob/master/core/src/main/cpp/art/art_method.h
+            boolean is64Bit = NativeHelper.isCurrentRuntime64Bit();
             switch (Build.VERSION.SDK_INT) {
-                case 35:
-                case Build.VERSION_CODES.UPSIDE_DOWN_CAKE:
-                case Build.VERSION_CODES.TIRAMISU:
-                case Build.VERSION_CODES.S_V2:
-                case Build.VERSION_CODES.S:
-                    sArtMethodNativeEntryPointOffset = 16;
-                    break;
-                case Build.VERSION_CODES.R:
-                case Build.VERSION_CODES.Q:
-                case Build.VERSION_CODES.P:
-                    sArtMethodNativeEntryPointOffset = NativeHelper.isCurrentRuntime64Bit() ? 24 : 20;
-                    break;
-                case Build.VERSION_CODES.O_MR1:
-                case Build.VERSION_CODES.O:
-                    sArtMethodNativeEntryPointOffset = NativeHelper.isCurrentRuntime64Bit() ? 32 : 24;
-                    break;
-                case Build.VERSION_CODES.N_MR1:
-                case Build.VERSION_CODES.N:
-                    sArtMethodNativeEntryPointOffset = NativeHelper.isCurrentRuntime64Bit() ? 40 : 28;
-                    break;
                 case Build.VERSION_CODES.M:
-                    sArtMethodNativeEntryPointOffset = NativeHelper.isCurrentRuntime64Bit() ? 40 : 32;
+                    sArtMethodNativeEntryPointOffset = is64Bit ? 40 : 32;
+                    break;
+                case Build.VERSION_CODES.N:
+                case Build.VERSION_CODES.N_MR1:
+                    sArtMethodNativeEntryPointOffset = is64Bit ? 40 : 28;
+                    break;
+                case Build.VERSION_CODES.O:
+                case Build.VERSION_CODES.O_MR1:
+                    sArtMethodNativeEntryPointOffset = is64Bit ? 32 : 24;
+                    break;
+                case Build.VERSION_CODES.P:
+                case Build.VERSION_CODES.Q:
+                case Build.VERSION_CODES.R:
+                    sArtMethodNativeEntryPointOffset = is64Bit ? 24 : 20;
+                    break;
+                case Build.VERSION_CODES.S:
+                case Build.VERSION_CODES.S_V2:
+                case Build.VERSION_CODES.TIRAMISU:
+                case Build.VERSION_CODES.UPSIDE_DOWN_CAKE:
+                case 35:
+                    sArtMethodNativeEntryPointOffset = 16;
                     break;
                 default:
                     // use last/latest known offset
@@ -182,6 +183,9 @@ public class ArtMethodHelper {
     public static void registerNativeMethod(@NonNull Member method, long address) {
         if (!(method instanceof Method) && !(method instanceof Constructor)) {
             throw new IllegalArgumentException("method must be a method or constructor");
+        }
+        if (address == 0) {
+            throw new IllegalArgumentException("address must not be 0");
         }
         int modifiers = method.getModifiers();
         if (!Modifier.isNative(modifiers)) {

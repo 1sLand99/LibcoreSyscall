@@ -8,8 +8,9 @@ import java.util.Map;
 import dev.tmpfs.libcoresyscall.core.impl.NativeBridge;
 import dev.tmpfs.libcoresyscall.core.impl.ReflectHelper;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.BaseTrampolineCreator;
+import dev.tmpfs.libcoresyscall.core.impl.trampoline.ISyscallNumberTable;
 
-public class TrampolineCreator_X86_64 extends BaseTrampolineCreator {
+public class TrampolineCreator_X86_64 extends BaseTrampolineCreator implements ISyscallNumberTable {
 
     private TrampolineCreator_X86_64() {
     }
@@ -140,6 +141,54 @@ public class TrampolineCreator_X86_64 extends BaseTrampolineCreator {
                             0x66, 0x2e, 0x0f, 0x1f, (byte) 0x84, 0x00, 0x00, 0x00, 0x00, 0x00
                     }
             );
+            //0000000000001690 <NativeBridge_nativeGetJavaVM>:
+            //    1690: 50                            pushq   %rax
+            //    1691: 48 c7 04 24 00 00 00 00       movq    $0x0, (%rsp)
+            //    1699: 48 8b 07                      movq    (%rdi), %rax
+            //    169c: 48 89 e6                      movq    %rsp, %rsi
+            //    169f: ff 90 d8 06 00 00             callq   *0x6d8(%rax)
+            //    16a5: 85 c0                         testl   %eax, %eax
+            //    16a7: 75 06                         jne     0x16af <NativeBridge_nativeGetJavaVM+0x1f>
+            //    16a9: 48 8b 04 24                   movq    (%rsp), %rax
+            //    16ad: 59                            popq    %rcx
+            //    16ae: c3                            retq
+            //    16af: 31 c0                         xorl    %eax, %eax
+            //    16b1: 59                            popq    %rcx
+            //    16b2: c3                            retq
+            //    16b3: 66 66 66 66 2e 0f 1f 84 00 00 00 00 00        nopw    %cs:(%rax,%rax)
+            result.put(
+                    NativeBridge.class.getMethod("nativeGetJavaVM"),
+                    new byte[]{
+                            // pushq   %rax
+                            0x50,
+                            // movq    $0x0, (%rsp)
+                            0x48, (byte) 0xc7, 0x04, 0x24, 0x00, 0x00, 0x00, 0x00,
+                            // movq    (%rdi), %rax
+                            0x48, (byte) 0x8b, 0x07,
+                            // movq    %rsp, %rsi
+                            0x48, (byte) 0x89, (byte) 0xe6,
+                            // callq   *0x6d8(%rax)
+                            (byte) 0xff, (byte) 0x90, (byte) 0xd8, 0x06, 0x00, 0x00,
+                            // testl   %eax, %eax
+                            (byte) 0x85, (byte) 0xc0,
+                            // jne     0x16af <NativeBridge_nativeGetJavaVM+0x1f>
+                            (byte) 0x75, 0x06,
+                            // movq    (%rsp), %rax
+                            0x48, (byte) 0x8b, 0x04, 0x24,
+                            // popq    %rcx
+                            0x59,
+                            // retq
+                            (byte) 0xc3,
+                            // xorl    %eax, %eax
+                            0x31, (byte) 0xc0,
+                            // popq    %rcx
+                            0x59,
+                            // retq
+                            (byte) 0xc3,
+                            // nopw    %cs:(%rax,%rax)
+                            0x66, 0x66, 0x66, 0x66, 0x2e, 0x0f, 0x1f, (byte) 0x84, 0x00, 0x00, 0x00, 0x00, 0x00
+                    }
+            );
             //0000000000000070 <NativeBridge_nativeSyscall>:
             //      70: 41 57                         pushq   %r15
             //      72: 41 56                         pushq   %r14
@@ -210,9 +259,9 @@ public class TrampolineCreator_X86_64 extends BaseTrampolineCreator {
     }
 
     @Override
-    public long mprotect(long address, long size, int prot) {
-        final int _NR_mprotect_x86_64 = 10;
-        return NativeBridge.nativeSyscall(_NR_mprotect_x86_64, address, size, prot, 0, 0, 0);
+    public int __NR_mprotect() {
+        // mprotect x86_64: 10
+        return 10;
     }
 
 }

@@ -8,7 +8,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import dev.tmpfs.libcoresyscall.core.Syscall;
+import dev.tmpfs.libcoresyscall.core.impl.trampoline.ISyscallNumberTable;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.ITrampolineCreator;
+import dev.tmpfs.libcoresyscall.core.impl.trampoline.CommonSyscallNumberTables;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.TrampolineCreatorFactory;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.TrampolineInfo;
 import libcore.io.Memory;
@@ -37,6 +39,8 @@ public class NativeBridge {
     public static native long nativeCallPointerFunction3(long function, long arg1, long arg2, long arg3);
 
     public static native long nativeCallPointerFunction4(long function, long arg1, long arg2, long arg3, long arg4);
+
+    public static native long nativeGetJavaVM();
 
     public static long getPageSize() {
         long ps = sPageSize;
@@ -84,11 +88,18 @@ public class NativeBridge {
             sNativeMethodRegistered = true;
         }
         if (!sTrampolineSetReadOnly) {
-            // 6. Set the memory region to read-only.
+            // 6. Clear the instruction cache.
+            // Unfortunately, there is no way to clear the instruction cache without using JNI.
+            // The I-cache is typically empty since we the page is just allocated.
+            // But we had better flush the D-cache to make sure the CPU loads the latest instructions into the I-cache.
+            // If we successfully invoke the nativeClearCache method without a crash, then there will be no further issues.
+            // TODO: 2024-10-28 Do something to clear the d-cache.
+            NativeBridge.nativeClearCache(sTrampolineBase, getPageSize());
+            // 7. Set the memory region to read-only.
             long pageSize = getPageSize();
-            ITrampolineCreator creator = TrampolineCreatorFactory.create();
-            TrampolineInfo trampoline = creator.generateTrampoline((int) pageSize);
-            long rc = creator.mprotect(sTrampolineBase, pageSize, OsConstants.PROT_READ | OsConstants.PROT_EXEC);
+            ISyscallNumberTable sysnr = CommonSyscallNumberTables.get();
+            long rc = NativeBridge.nativeSyscall(sysnr.__NR_mprotect(), sTrampolineBase, pageSize,
+                    OsConstants.PROT_READ | OsConstants.PROT_EXEC, 0, 0, 0);
             if (Syscall.isError(rc)) {
                 throw new AssertionError("mprotect failed with errno: " + -rc);
             }

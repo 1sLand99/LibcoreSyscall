@@ -4,6 +4,4 @@ public interface ITrampolineCreator {
 
     TrampolineInfo generateTrampoline(int pageSize);
 
-    long mprotect(long address, long size, int prot);
-
 }

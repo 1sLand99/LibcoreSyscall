@@ -8,13 +8,14 @@ import java.util.Map;
 import dev.tmpfs.libcoresyscall.core.impl.NativeBridge;
 import dev.tmpfs.libcoresyscall.core.impl.ReflectHelper;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.BaseTrampolineCreator;
+import dev.tmpfs.libcoresyscall.core.impl.trampoline.ISyscallNumberTable;
 
-public class TrampolineCreator_ARM64 extends BaseTrampolineCreator {
+public class TrampolineCreator_Arm64 extends BaseTrampolineCreator implements ISyscallNumberTable {
 
-    private TrampolineCreator_ARM64() {
+    private TrampolineCreator_Arm64() {
     }
 
-    public static final TrampolineCreator_ARM64 INSTANCE = new TrampolineCreator_ARM64();
+    public static final TrampolineCreator_Arm64 INSTANCE = new TrampolineCreator_Arm64();
 
     private static byte[] instructionsToBytes(int... inst) {
         byte[] result = new byte[inst.length * 4];
@@ -158,6 +159,40 @@ public class TrampolineCreator_ARM64 extends BaseTrampolineCreator {
                             0xd61f0080  // br x4
                     )
             );
+            //00000000000016ac <NativeBridge_nativeGetJavaVM>:
+            //    16ac: d10083ff      sub     sp, sp, #0x20
+            //    16b0: a9017bfd      stp     x29, x30, [sp, #0x10]
+            //    16b4: 910043fd      add     x29, sp, #0x10
+            //    16b8: f9400008      ldr     x8, [x0]
+            //    16bc: 910023e1      add     x1, sp, #0x8
+            //    16c0: f90007ff      str     xzr, [sp, #0x8]
+            //    16c4: f9436d08      ldr     x8, [x8, #0x6d8]
+            //    16c8: d63f0100      blr     x8
+            //    16cc: f94007e8      ldr     x8, [sp, #0x8]
+            //    16d0: 7100001f      cmp     w0, #0x0
+            //    16d4: 9a9f0100      csel    x0, x8, xzr, eq
+            //    16d8: a9417bfd      ldp     x29, x30, [sp, #0x10]
+            //    16dc: 910083ff      add     sp, sp, #0x20
+            //    16e0: d65f03c0      ret
+            result.put(
+                    NativeBridge.class.getMethod("nativeGetJavaVM"),
+                    instructionsToBytes(
+                            0xd10083ff, // sub sp, sp, #0x20
+                            0xa9017bfd, // stp x29, x30, [sp, #0x10]
+                            0x910043fd, // add x29, sp, #0x10
+                            0xf9400008, // ldr x8, [x0]
+                            0x910023e1, // add x1, sp, #0x8
+                            0xf90007ff, // str xzr, [sp, #0x8]
+                            0xf9436d08, // ldr x8, [x8, #0x6d8]
+                            0xd63f0100, // blr x8
+                            0xf94007e8, // ldr x8, [sp, #0x8]
+                            0x7100001f, // cmp w0, #0x0
+                            0x9a9f0100, // csel x0, x8, xzr, eq
+                            0xa9417bfd, // ldp x29, x30, [sp, #0x10]
+                            0x910083ff, // add sp, sp, #0x20
+                            0xd65f03c0  // ret
+                    )
+            );
             //000000000000190c <NativeBridge_nativeSyscall>:
             //    190c: aa0503e8      mov     x8, x5
             //    1910: aa0303e0      mov     x0, x3
@@ -193,9 +228,9 @@ public class TrampolineCreator_ARM64 extends BaseTrampolineCreator {
     }
 
     @Override
-    public long mprotect(long address, long size, int prot) {
-        final int _NR_mprotect_arm64 = 226;
-        return NativeBridge.nativeSyscall(_NR_mprotect_arm64, address, size, prot, 0, 0, 0);
+    public int __NR_mprotect() {
+        // mprotect arm64: 226
+        return 226;
     }
 
 }
