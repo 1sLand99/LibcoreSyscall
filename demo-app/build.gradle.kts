@@ -2,7 +2,6 @@
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -21,15 +20,13 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+        viewBinding = false
         buildConfig = true
         resValues = true
     }
 
     dependencies {
-        implementation(libs.androidx.appcompat)
-        implementation(libs.androidx.core.ktx)
-        implementation(libs.hiddenapibypass)
+        compileOnly(libs.androidx.annotation)
         implementation(projects.coreSyscall)
     }
 

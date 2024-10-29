@@ -3,9 +3,8 @@
 
     <application
         android:name="com.example.test.app.TestApplication"
-        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:label="SyscallTest"
-        android:theme="@style/Theme.AppCompat.DayNight"
+        android:theme="@android:style/Theme.Holo"
         tools:ignore="MissingApplicationIcon"
         tools:targetApi="q">
 
