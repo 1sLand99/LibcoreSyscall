@@ -331,78 +331,74 @@ public class TrampolineCreator_X86 extends BaseTrampolineCreator implements ISys
                             (byte) 0x90
                     }
             );
-            //00001690 <NativeBridge_nativeSyscall>:
-            //    1690: 55                            pushl   %ebp
-            //    1691: 89 e5                         movl    %esp, %ebp
-            //    1693: 53                            pushl   %ebx
-            //    1694: 57                            pushl   %edi
-            //    1695: 56                            pushl   %esi
-            //    1696: 83 e4 fc                      andl    $-0x4, %esp
-            //    1699: 83 ec 0c                      subl    $0xc, %esp
-            //    169c: 8b 4d 10                      movl    0x10(%ebp), %ecx
-            //    169f: 8b 55 1c                      movl    0x1c(%ebp), %edx
-            //    16a2: 8b 75 24                      movl    0x24(%ebp), %esi
-            //    16a5: 8b 7d 2c                      movl    0x2c(%ebp), %edi
-            //    16a8: 8b 45 14                      movl    0x14(%ebp), %eax
-            //    16ab: 89 44 24 04                   movl    %eax, 0x4(%esp)
-            //    16af: 8b 45 3c                      movl    0x3c(%ebp), %eax
-            //    16b2: 89 44 24 08                   movl    %eax, 0x8(%esp)
-            //    16b6: 8b 5d 34                      movl    0x34(%ebp), %ebx
-            //    16b9: 8d 44 24 04                   leal    0x4(%esp), %eax
-            //    16bd: 55                            pushl   %ebp
-            //    16be: 53                            pushl   %ebx
-            //    16bf: 8b 68 04                      movl    0x4(%eax), %ebp
-            //    16c2: 8b 18                         movl    (%eax), %ebx
-            //    16c4: 89 c8                         movl    %ecx, %eax
-            //    16c6: cd 80                         int     $0x80
-            //    16c8: 5b                            popl    %ebx
-            //    16c9: 5d                            popl    %ebp
-            //    16ca: 89 c2                         movl    %eax, %edx
-            //    16cc: c1 fa 1f                      sarl    $0x1f, %edx
-            //    16cf: 8d 65 f4                      leal    -0xc(%ebp), %esp
-            //    16d2: 5e                            popl    %esi
-            //    16d3: 5f                            popl    %edi
-            //    16d4: 5b                            popl    %ebx
-            //    16d5: 5d                            popl    %ebp
-            //    16d6: c3                            retl
-            //    16d7: 90                            nop
+            //00001200 <NativeBridge_nativeSyscall>:
+            //    1200:       55                      push   ebp
+            //    1201:       89 e5                   mov    ebp,esp
+            //    1203:       57                      push   edi
+            //    1204:       56                      push   esi
+            //    1205:       83 e4 fc                and    esp,0xfffffffc
+            //    1208:       83 ec 10                sub    esp,0x10
+            //    120b:       8b 4d 1c                mov    ecx,DWORD PTR [ebp+0x1c]
+            //    120e:       8b 55 24                mov    edx,DWORD PTR [ebp+0x24]
+            //    1211:       8b 75 2c                mov    esi,DWORD PTR [ebp+0x2c]
+            //    1214:       8b 7d 34                mov    edi,DWORD PTR [ebp+0x34]
+            //    1217:       8b 45 14                mov    eax,DWORD PTR [ebp+0x14]
+            //    121a:       89 44 24 04             mov    DWORD PTR [esp+0x4],eax
+            //    121e:       8b 45 3c                mov    eax,DWORD PTR [ebp+0x3c]
+            //    1221:       89 44 24 08             mov    DWORD PTR [esp+0x8],eax
+            //    1225:       8b 45 10                mov    eax,DWORD PTR [ebp+0x10]
+            //    1228:       89 44 24 0c             mov    DWORD PTR [esp+0xc],eax
+            //    122c:       8d 44 24 04             lea    eax,[esp+0x4]
+            //    1230:       55                      push   ebp
+            //    1231:       53                      push   ebx
+            //    1232:       8b 68 04                mov    ebp,DWORD PTR [eax+0x4]
+            //    1235:       8b 18                   mov    ebx,DWORD PTR [eax]
+            //    1237:       8b 40 08                mov    eax,DWORD PTR [eax+0x8]
+            //    123a:       cd 80                   int    0x80
+            //    123c:       5b                      pop    ebx
+            //    123d:       5d                      pop    ebp
+            //    123e:       89 c2                   mov    edx,eax
+            //    1240:       c1 fa 1f                sar    edx,0x1f
+            //    1243:       8d 65 f8                lea    esp,[ebp-0x8]
+            //    1246:       5e                      pop    esi
+            //    1247:       5f                      pop    edi
+            //    1248:       5d                      pop    ebp
+            //    1249:       c3                      ret
             result.put(
                     NativeBridge.class.getMethod("nativeSyscall", int.class, long.class, long.class, long.class, long.class, long.class, long.class),
                     new byte[]{
                             (byte) 0x55,
                             (byte) 0x89, (byte) 0xE5,
-                            (byte) 0x53,
                             (byte) 0x57,
                             (byte) 0x56,
                             (byte) 0x83, (byte) 0xE4, (byte) 0xFC,
-                            (byte) 0x83, (byte) 0xEC, 0x0C,
-                            (byte) 0x8B, 0x4D, 0x10,
-                            (byte) 0x8B, 0x55, 0x1C,
-                            (byte) 0x8B, 0x75, 0x24,
-                            (byte) 0x8B, 0x7D, 0x2C,
+                            (byte) 0x83, (byte) 0xEC, 0x10,
+                            (byte) 0x8B, 0x4D, 0x1C,
+                            (byte) 0x8B, 0x55, 0x24,
+                            (byte) 0x8B, 0x75, 0x2C,
+                            (byte) 0x8B, 0x7D, 0x34,
                             (byte) 0x8B, 0x45, 0x14,
                             (byte) 0x89, 0x44, 0x24, 0x04,
                             (byte) 0x8B, 0x45, 0x3C,
                             (byte) 0x89, 0x44, 0x24, 0x08,
-                            (byte) 0x8B, 0x5D, 0x34,
+                            (byte) 0x8B, 0x45, 0x10,
+                            (byte) 0x89, 0x44, 0x24, 0x0C,
                             (byte) 0x8D, 0x44, 0x24, 0x04,
                             (byte) 0x55,
                             (byte) 0x53,
                             (byte) 0x8B, 0x68, 0x04,
                             (byte) 0x8B, 0x18,
-                            (byte) 0x89, (byte) 0xC8,
+                            (byte) 0x8B, 0x40, 0x08,
                             (byte) 0xCD, (byte) 0x80,
                             (byte) 0x5B,
                             (byte) 0x5D,
                             (byte) 0x89, (byte) 0xC2,
                             (byte) 0xC1, (byte) 0xFA, 0x1F,
-                            (byte) 0x8D, 0x65, (byte) 0xF4,
+                            (byte) 0x8D, 0x65, (byte) 0xF8,
                             (byte) 0x5E,
                             (byte) 0x5F,
-                            (byte) 0x5B,
                             (byte) 0x5D,
-                            (byte) 0xC3,
-                            (byte) 0x90
+                            (byte) 0xC3
                     }
             );
         } catch (NoSuchMethodException e) {
