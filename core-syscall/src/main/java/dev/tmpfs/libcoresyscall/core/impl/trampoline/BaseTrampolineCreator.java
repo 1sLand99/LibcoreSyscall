@@ -41,10 +41,13 @@ public abstract class BaseTrampolineCreator implements ITrampolineCreator {
             }
             // Copy the code to trampoline
             System.arraycopy(code, 0, trampoline, offset, codeSize);
+            methodOffsets.put(method, offset);
             offset += codeSize;
             // Fill the padding instruction
             int gapBytes = offset % 16;
-            gapBytes += 16;
+            if (gapBytes == 0) {
+                gapBytes += 16;
+            }
             if (gapBytes % paddingInstructionSize != 0) {
                 throw new IllegalStateException("padding instruction size is not aligned to gap bytes");
             }
@@ -53,7 +56,6 @@ public abstract class BaseTrampolineCreator implements ITrampolineCreator {
                 System.arraycopy(paddingInstruction, 0, trampoline, offset, paddingInstructionSize);
                 offset += paddingInstructionSize;
             }
-            methodOffsets.put(method, offset);
         }
         // 4. Fill the padding instruction at the end of the trampoline
         int gapSize = pageSize - offset;
