@@ -1,4 +1,4 @@
-package dev.tmpfs.libcoresyscall.core.impl;
+package dev.tmpfs.libcoresyscall.core;
 
 import androidx.annotation.NonNull;
 
@@ -7,13 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
+import dev.tmpfs.libcoresyscall.core.impl.ReflectHelper;
+
 public class NativeHelper {
 
     private NativeHelper() {
     }
 
-    public static final int ELF_CLASS_32 = 1;
-    public static final int ELF_CLASS_64 = 2;
+    private static final int ELF_CLASS_32 = 1;
+    private static final int ELF_CLASS_64 = 2;
     public static final int ISA_NONE = 0;
     // EM_386 = 3
     public static final int ISA_X86 = (ELF_CLASS_32 << 16) | 3;
@@ -83,31 +85,6 @@ public class NativeHelper {
                 throw new IOException("End of stream reached before reading " + count + " bytes");
             }
             read += len;
-        }
-    }
-
-    public static String getNativeLibraryDirName(int isa) {
-        switch (isa) {
-            case ISA_X86:
-                return "x86";
-            case ISA_X86_64:
-                return "x86_64";
-            case ISA_ARM:
-                // we only support armeabi-v7a, not armeabi
-                return "armeabi-v7a";
-            case ISA_ARM64:
-                return "arm64-v8a";
-            case ISA_MIPS:
-                // not sure, I have never seen a mips device
-                return "mips";
-            case ISA_MIPS64:
-                // not sure, I have never seen a mips64 device
-                return "mips64";
-            case ISA_RISCV64:
-                // not sure, I have never seen a riscv64 device
-                return "riscv64";
-            default:
-                throw new IllegalArgumentException("Unsupported ISA: " + isa);
         }
     }
 

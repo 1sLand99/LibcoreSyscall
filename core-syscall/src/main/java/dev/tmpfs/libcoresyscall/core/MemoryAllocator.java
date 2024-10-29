@@ -156,19 +156,28 @@ public class MemoryAllocator {
      */
     private static UnitMemory tryAllocateMemoryUnitLocked(int unitCount, int requestedSize) {
         for (PageUnitInfo page : sUnitMemoryPageList) {
-            // find a page that has enough free units.
-            // find first in gap, and then tail.
-            for (int gapIndex = 0; gapIndex < page.allocatedUnits.size(); gapIndex++) {
-                int[] lastUnit = gapIndex == 0 ? null : page.allocatedUnits.get(gapIndex - 1);
-                int[] nextUnit = gapIndex == page.allocatedUnits.size() - 1 ? null : page.allocatedUnits.get(gapIndex);
-                int gapStart = lastUnit == null ? 0 : lastUnit[0] + lastUnit[1];
-                int gapEnd = nextUnit == null ? UNIT_PER_PAGE : nextUnit[0];
-                if (gapEnd - gapStart >= unitCount) {
-                    // found a gap that has enough units.
-                    int unitIndex = gapStart;
-                    page.allocatedUnits.add(gapIndex, new int[]{unitIndex, unitCount});
-                    long address = page.address + (long) unitIndex * UNIT_SIZE;
+            if (page.allocatedUnits.isEmpty()) {
+                // the page is empty, allocate the first unit.
+                if (unitCount <= UNIT_PER_PAGE) {
+                    page.allocatedUnits.add(new int[]{0, unitCount});
+                    long address = page.address;
                     return new UnitMemory(address, requestedSize, (long) unitCount * UNIT_SIZE);
+                }
+            } else {
+                // find a page that has enough free units.
+                // find first in gap, and then tail.
+                for (int gapIndex = 0; gapIndex < page.allocatedUnits.size(); gapIndex++) {
+                    int[] thisUnit = page.allocatedUnits.get(gapIndex);
+                    int[] nextUnit = gapIndex + 1 < page.allocatedUnits.size() ?
+                            page.allocatedUnits.get(gapIndex + 1) : null;
+                    int gapStart = thisUnit[0] + thisUnit[1];
+                    int gapEnd = (nextUnit != null) ? nextUnit[0] : UNIT_PER_PAGE;
+                    // check if the gap is enough.
+                    if (gapEnd - gapStart >= unitCount) {
+                        page.allocatedUnits.add(gapIndex, new int[]{gapStart, unitCount});
+                        long address = page.address + (long) gapStart * UNIT_SIZE;
+                        return new UnitMemory(address, requestedSize, (long) unitCount * UNIT_SIZE);
+                    }
                 }
             }
         }
@@ -244,16 +253,33 @@ public class MemoryAllocator {
     /**
      * Allocate a memory block with the specified size. It's caller's responsibility to free the memory block.
      *
+     * @param size   the size of the memory block
+     * @param zeroed whether to zero the memory block
+     * @return the allocated memory block
+     */
+    public static IAllocatedMemory allocate(long size, boolean zeroed) {
+        // if requested size is 75% of page size, we allocate directly.
+        if (size >= PAGE_SIZE * 3 / 4) {
+            // anonymous memory maps are zeroed by default.
+            return allocateDirectPageMemory(size);
+        } else {
+            IAllocatedMemory mem = allocateUnitMemory((int) size);
+            // it may be used multiple times, so zero it here.
+            if (zeroed) {
+                MemoryAccess.memset(mem.getAddress(), 0, size);
+            }
+            return mem;
+        }
+    }
+
+    /**
+     * Allocate a memory block with the specified size. It's caller's responsibility to free the memory block.
+     *
      * @param size the size of the memory block
      * @return the allocated memory block
      */
     public static IAllocatedMemory allocate(long size) {
-        // if requested size is 75% of page size, we allocate directly.
-        if (size >= PAGE_SIZE * 3 / 4) {
-            return allocateDirectPageMemory(size);
-        } else {
-            return allocateUnitMemory((int) size);
-        }
+        return allocate(size, false);
     }
 
     /**
@@ -288,6 +314,21 @@ public class MemoryAllocator {
      */
     public static IAllocatedMemory copyString(String string) {
         return copyBytes(string.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Allocate a memory block and copy the specified C string to it.
+     * The C string is a null-terminated string.
+     *
+     * @param string the C string to copy
+     * @return the allocated memory block
+     */
+    public static IAllocatedMemory copyCString(String string) {
+        byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
+        byte[] cString = new byte[bytes.length + 1];
+        System.arraycopy(bytes, 0, cString, 0, bytes.length);
+        cString[bytes.length] = 0;
+        return copyBytes(cString);
     }
 
 }

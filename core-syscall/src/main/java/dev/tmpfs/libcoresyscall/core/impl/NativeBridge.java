@@ -98,10 +98,12 @@ public class NativeBridge {
             // 7. Set the memory region to read-only.
             long pageSize = getPageSize();
             ISyscallNumberTable sysnr = CommonSyscallNumberTables.get();
-            long rc = NativeBridge.nativeSyscall(sysnr.__NR_mprotect(), sTrampolineBase, pageSize,
-                    OsConstants.PROT_READ | OsConstants.PROT_EXEC, 0, 0, 0);
-            if (Syscall.isError(rc)) {
-                throw new AssertionError("mprotect failed with errno: " + -rc);
+            try {
+                long rc = NativeBridge.nativeSyscall(sysnr.__NR_mprotect(), sTrampolineBase, pageSize,
+                        OsConstants.PROT_READ | OsConstants.PROT_EXEC, 0, 0, 0);
+                Syscall.checkResultOrThrow(rc, "mprotect");
+            } catch (ErrnoException e) {
+                throw ReflectHelper.unsafeThrow(e);
             }
             sTrampolineSetReadOnly = true;
         }

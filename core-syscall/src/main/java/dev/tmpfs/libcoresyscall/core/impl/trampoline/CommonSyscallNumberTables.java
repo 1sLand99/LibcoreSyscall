@@ -2,7 +2,7 @@ package dev.tmpfs.libcoresyscall.core.impl.trampoline;
 
 import java.util.HashMap;
 
-import dev.tmpfs.libcoresyscall.core.impl.NativeHelper;
+import dev.tmpfs.libcoresyscall.core.NativeHelper;
 import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Arm64;
 import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_X86_64;
 import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Riscv64;
