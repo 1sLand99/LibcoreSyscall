@@ -39,18 +39,19 @@ public class TrampolineCreator_Arm extends BaseTrampolineCreator implements ISys
     public Map<Method, byte[]> getNativeMethods() {
         HashMap<Method, byte[]> result = new HashMap<>();
         try {
-            //00001400 <NativeBridge_nativeClearCache>:
-            //    1400: e92d4c80      push    {r7, r10, r11, lr}
-            //    1404: e28db008      add     r11, sp, #8
-            //    1408: e59b1008      ldr     r1, [r11, #0x8]
-            //    140c: e3007002      movw    r7, #0x2
-            //    1410: e1a00002      mov     r0, r2
-            //    1414: e340700f      movt    r7, #0xf
-            //    1418: e0811002      add     r1, r1, r2
-            //    141c: ef000000      svc     #0x0
-            //    1420: e3500000      cmp     r0, #0
-            //    1424: 08bd8c80      popeq   {r7, r10, r11, pc}
-            //    1428: e7ffdefe      trap
+            //000011b8 <NativeBridge_nativeClearCache>:
+            //    11b8: e92d4c80      push    {r7, r10, r11, lr}
+            //    11bc: e28db008      add     r11, sp, #8
+            //    11c0: e59b1008      ldr     r1, [r11, #0x8]
+            //    11c4: e3007002      movw    r7, #0x2
+            //    11c8: e1a00002      mov     r0, r2
+            //    11cc: e340700f      movt    r7, #0xf
+            //    11d0: e0811002      add     r1, r1, r2
+            //    11d4: e3a02000      mov     r2, #0
+            //    11d8: ef000000      svc     #0x0
+            //    11dc: e3500000      cmp     r0, #0
+            //    11e0: 08bd8c80      popeq   {r7, r10, r11, pc}
+            //    11e4: e7ffdefe      trap
             result.put(
                     NativeBridge.class.getMethod("nativeClearCache", long.class, long.class),
                     instructionsToBytes(
@@ -61,6 +62,7 @@ public class TrampolineCreator_Arm extends BaseTrampolineCreator implements ISys
                             0xe1a00002,
                             0xe340700f,
                             0xe0811002,
+                            0xe3a02000,
                             0xef000000,
                             0xe3500000,
                             0x08bd8c80,
