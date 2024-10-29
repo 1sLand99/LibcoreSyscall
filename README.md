@@ -1,8 +1,8 @@
 # Libcore-Syscall
 
-Libcore-Syscall is a Java library for Android that allows you to call any Linux system calls directly from Java code.
+Libcore-Syscall is a Java library for Android that allows you to make any Linux system calls directly from Java code.
 
-# Features
+## Features
 
 - Support Android 5.0 - 15
 - Support any system calls (as long as they are permitted by the seccomp filter)
@@ -11,7 +11,7 @@ Libcore-Syscall is a Java library for Android that allows you to call any Linux 
 - No `System.loadLibrary` or `System.load` is used
 - Small, no dependencies
 
-# Usage
+## Usage
 
 The library provides the following classes:
 
@@ -19,7 +19,7 @@ The library provides the following classes:
 - NativeAccess: Register JNI methods, or call native functions (such as `dlopen`, `dlsym`, etc.) directly.
 - Syscall: Call any Linux system calls.
 
-# Example
+## Example
 
 Here is an example of how to use the library. It calls the `uname` system call to get the system information.
 
@@ -67,42 +67,42 @@ public String unameDemo() {
 
 </details>
 
-# The Tricks
+## The Tricks
 
 - The Android-specific `libcore.io.Memory` and the evil `sun.misc.Unsafe` are used to access the native memory.
 - Anonymous executable pages are allocated using the `android.system.Os.mmap` method.
 - Native methods are registered with direct access to the `art::ArtMethod::entry_point_from_jni_` field.
 
-# Notice
+## Notice
 
 - This library is not intended to be used in production code. You use it once and it may crash anywhere. It is only for a Proof of Concept.
 - This library can only work on ART, not on OpenJDK HotSpot / OpenJ9 / GraalVM.
 - The `execmem` SELinux permission is required to allocate anonymous executable memory. Fortunately, this permission is granted to all app domain process.
 - The `system_server` does not have the `execmem` permission. However, this is not true if you have a system-wide Xposed framework installed.
 
-# Build
+## Build
 
-Build the library:
+To build the library:
 
 ```shell
 ./gradlew :core-syscall:assembleDebug
 ```
 
-Build the demo app:
+To build the demo app:
 
 ```shell
 ./gradlew :demo-app:assembleDebug
 ```
 
-# The Future
+## The Future
 
 - A symbol resolver that can resolve symbols in loaded native libraries.
 - Loading arbitrary shared libraries (lib*.so) with 100% pure Java code in memory without writing it to the disk.
 
-# Credits
+## Credits
 
 - [pine](https://github.com/canyie/pine)
 
-# License
+## License
 
 The library is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
