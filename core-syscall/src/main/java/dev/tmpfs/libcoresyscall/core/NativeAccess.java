@@ -70,7 +70,32 @@ public class NativeAccess {
     }
 
     /**
+     * Unregister a native method for the specified method/constructor.
+     * <p>
+     * Warning: This method should not be used to unregister native methods annotated with @FastNative or @CriticalNative.
+     *
+     * @param method the method/constructor reflect object
+     */
+    public static void unregisterNativeMethod(@NonNull Member method) {
+        ArtMethodHelper.unregisterNativeMethod(method);
+    }
+
+    /**
+     * Get the registered native method for the specified method/constructor.
+     * <p>
+     * Warning: This method should not be used to get native methods annotated with @FastNative or @CriticalNative.
+     *
+     * @param method the method/constructor reflect object
+     * @return the registered native function pointer, or 0 if not registered
+     */
+    public static long getRegisteredNativeMethod(@NonNull Member method) {
+        return ArtMethodHelper.getRegisteredNativeMethod(method);
+    }
+
+    /**
      * Get the JavaVM pointer.
+     * <p>
+     * The returned JavaVM pointer can be used for calling JNI_OnLoad arguments.
      *
      * @return the JavaVM pointer
      */

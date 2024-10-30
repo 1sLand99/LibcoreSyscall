@@ -200,4 +200,89 @@ public class ArtMethodHelper {
         }
     }
 
+    private static long getArtMethodEntryPointFromJniRaw(@NonNull Member method) {
+        if (!(method instanceof Method) && !(method instanceof Constructor)) {
+            throw new IllegalArgumentException("method must be a method or constructor");
+        }
+        int modifiers = method.getModifiers();
+        if (!Modifier.isNative(modifiers)) {
+            throw new IllegalArgumentException("method must be native: " + method);
+        }
+        if (Build.VERSION.SDK_INT < 23) {
+            Object artMethod = getArtMethodObjectBelowSdk23(method);
+            if (artMethod == null) {
+                throw new IllegalArgumentException("unable to get ArtMethod from " + method);
+            }
+            long offset = getArtMethodEntryPointFromJniOffset();
+            if (offset == 0) {
+                throw new IllegalStateException("unable to get ArtMethod::entry_point_from_jni_ offset");
+            }
+            if (NativeHelper.isCurrentRuntime64Bit()) {
+                return getUnsafe().getLong(artMethod, offset);
+            } else {
+                return ((long) getUnsafe().getInt(artMethod, offset)) & 0xFFFFFFFFL;
+            }
+        } else {
+            // for API 23 and above
+            long artMethod = getArtMethodAddressFromReflectedMethod(method);
+            if (artMethod == 0) {
+                throw new IllegalArgumentException("unable to get ArtMethod from " + method);
+            }
+            long offset = getArtMethodEntryPointFromJniOffset();
+            if (offset == 0) {
+                throw new IllegalStateException("unable to get ArtMethod::entry_point_from_jni_ offset");
+            }
+            long addr = artMethod + offset;
+            // actual native method registration
+            if (NativeHelper.isCurrentRuntime64Bit()) {
+                return Memory.peekLong(addr, false);
+            } else {
+                return ((long) Memory.peekInt(addr, false)) & 0xFFFFFFFFL;
+            }
+        }
+    }
+
+    private static class NeverCall {
+
+        private NeverCall() {
+            throw new AssertionError("never call");
+        }
+
+        native void nativeNeverCall();
+
+    }
+
+    private static long sArtJniDlsymLookupStub = 0;
+
+    public static long getJniDlsymLookupStub() {
+        if (sArtJniDlsymLookupStub != 0) {
+            return sArtJniDlsymLookupStub;
+        }
+        Method nativeNeverCall;
+        try {
+            nativeNeverCall = NeverCall.class.getDeclaredMethod("nativeNeverCall");
+        } catch (NoSuchMethodException e) {
+            // should not happen
+            throw ReflectHelper.unsafeThrow(e);
+        }
+        long entryPoint = getArtMethodEntryPointFromJniRaw(nativeNeverCall);
+        if (entryPoint == 0) {
+            throw new IllegalStateException("unable to get ArtMethod::entry_point_from_jni_ for " + nativeNeverCall);
+        }
+        sArtJniDlsymLookupStub = entryPoint;
+        return sArtJniDlsymLookupStub;
+    }
+
+    public static void unregisterNativeMethod(@NonNull Member method) {
+        registerNativeMethod(method, getJniDlsymLookupStub());
+    }
+
+    public static long getRegisteredNativeMethod(@NonNull Member method) {
+        long entryPoint = getArtMethodEntryPointFromJniRaw(method);
+        if (entryPoint == getJniDlsymLookupStub()) {
+            return 0;
+        }
+        return entryPoint;
+    }
+
 }
