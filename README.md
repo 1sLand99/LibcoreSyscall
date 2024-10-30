@@ -17,7 +17,7 @@ The library provides the following classes:
 
 - MemoryAccess/MemoryAllocator: Allocate and read/write native memory.
 - NativeAccess: Register JNI methods, or call native functions (such as `dlopen`, `dlsym`, etc.) directly.
-- Syscall: Call any Linux system calls.
+- Syscall: Make any Linux system calls.
 
 ## Example
 
@@ -75,9 +75,9 @@ public String unameDemo() {
 
 ## Notice
 
-- This library is not intended to be used in production code. You use it once and it may crash anywhere. It is only for a Proof of Concept.
+- This library is not intended to be used in production code. You use it once and it may crash everywhere. It is only for a Proof of Concept.
 - This library can only work on ART, not on OpenJDK HotSpot / OpenJ9 / GraalVM.
-- The `execmem` SELinux permission is required to allocate anonymous executable memory. Fortunately, this permission is granted to all app domain process.
+- The `execmem` SELinux permission is required to allocate anonymous executable memory. Fortunately, this permission is granted to all app domain processes.
 - The `system_server` does not have the `execmem` permission. However, this is not true if you have a system-wide Xposed framework installed.
 
 ## Build
