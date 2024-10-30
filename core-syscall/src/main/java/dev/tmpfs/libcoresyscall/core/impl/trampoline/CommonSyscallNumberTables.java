@@ -3,13 +3,13 @@ package dev.tmpfs.libcoresyscall.core.impl.trampoline;
 import java.util.HashMap;
 
 import dev.tmpfs.libcoresyscall.core.NativeHelper;
-import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Arm64;
-import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_X86_64;
-import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Riscv64;
 import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Arm;
-import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_X86;
+import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Arm64;
 import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Mips64el;
 import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Mipsel;
+import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_Riscv64;
+import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_X86;
+import dev.tmpfs.libcoresyscall.core.impl.arch.TrampolineCreator_X86_64;
 
 public class CommonSyscallNumberTables {
 

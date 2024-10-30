@@ -8,9 +8,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import dev.tmpfs.libcoresyscall.core.Syscall;
+import dev.tmpfs.libcoresyscall.core.impl.trampoline.CommonSyscallNumberTables;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.ISyscallNumberTable;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.ITrampolineCreator;
-import dev.tmpfs.libcoresyscall.core.impl.trampoline.CommonSyscallNumberTables;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.TrampolineCreatorFactory;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.TrampolineInfo;
 import libcore.io.Memory;
