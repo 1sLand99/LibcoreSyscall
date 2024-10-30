@@ -413,4 +413,9 @@ public class TrampolineCreator_X86 extends BaseTrampolineCreator implements ISys
         return 125;
     }
 
+    @Override
+    public int __NR_memfd_create() {
+        // __NR_memfd_create x86 356
+        return 356;
+    }
 }

@@ -3,12 +3,13 @@ package dev.tmpfs.libcoresyscall.core;
 
 import android.system.ErrnoException;
 import android.system.OsConstants;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
 import dev.tmpfs.libcoresyscall.core.impl.NativeBridge;
-import dev.tmpfs.libcoresyscall.core.impl.trampoline.ISyscallNumberTable;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.CommonSyscallNumberTables;
+import dev.tmpfs.libcoresyscall.core.impl.trampoline.ISyscallNumberTable;
 
 public class Syscall {
 
@@ -126,6 +127,30 @@ public class Syscall {
         ISyscallNumberTable table = CommonSyscallNumberTables.get();
         long result = NativeBridge.nativeSyscall(table.__NR_mprotect(), address, size, prot, 0, 0, 0);
         checkResultOrThrow(result, "mprotect");
+    }
+
+    /**
+     * Just the same as {@link android.system.Os#memfd_create(String, int)}.
+     * <p>
+     * The memfd_create syscall does not appear to be blocked by seccomp filters on any Android version.
+     * <br/>
+     * <b>Please check the kernel version >= 3.17 before calling memfd_create.</b>
+     * Some older kernels segfault executing memfd_create() rather than returning ENOSYS (b/116769556).<br/>
+     * See <a href="https://android.googlesource.com/platform/art/+/master/libartbase/base/memfd.cc#40">libartbase/base/memfd.cc</a>
+     *
+     * @param name  the name of the memory file, for debugging purposes only, but must be non-empty
+     * @param flags the flags for the memory file
+     * @return the file descriptor integer
+     * @throws ErrnoException if the syscall fails
+     */
+    public static int memfd_create(@NonNull String name, int flags) throws ErrnoException {
+        if (TextUtils.isEmpty(name)) {
+            throw new IllegalArgumentException("name is empty");
+        }
+        try (IAllocatedMemory mem = MemoryAllocator.copyCString(name)) {
+            long res = syscallNoCheck(CommonSyscallNumberTables.get().__NR_memfd_create(), mem.getAddress(), flags);
+            return (int) getResultOrThrow(res, "memfd_create");
+        }
     }
 
 }

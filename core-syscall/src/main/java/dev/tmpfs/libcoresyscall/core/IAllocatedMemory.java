@@ -5,7 +5,9 @@ import java.io.Closeable;
 public interface IAllocatedMemory extends Closeable {
 
     /**
-     * Get the address of the memory block. If the memory block is already freed, the behavior is undefined.
+     * Get the address of the memory block.
+     * <p>
+     * If the memory block is already freed, it returns 0.
      *
      * @return the address of the memory block.
      */
@@ -13,6 +15,8 @@ public interface IAllocatedMemory extends Closeable {
 
     /**
      * Get the size of the memory block.
+     * <p>
+     * If the memory block is already freed, it returns 0.
      *
      * @return the size of the memory block in bytes.
      */
@@ -20,7 +24,7 @@ public interface IAllocatedMemory extends Closeable {
 
     /**
      * Free the memory block. It is safe to call this method multiple times.
-     * After the memory block is freed, the behavior of calling {@link #getAddress()} is undefined.
+     * After the memory block is freed, calling {@link #getAddress()} and {@link #getSize()} will return 0.
      */
     void free();
 

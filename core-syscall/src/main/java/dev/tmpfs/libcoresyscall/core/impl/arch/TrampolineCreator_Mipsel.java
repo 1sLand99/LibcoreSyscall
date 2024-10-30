@@ -286,8 +286,13 @@ public class TrampolineCreator_Mipsel extends BaseTrampolineCreator implements I
 
     @Override
     public int __NR_mprotect() {
-        // mprotect mipsel o32 4125
+        // mprotect mipsel o32 4000+125
         return 4125;
     }
 
+    @Override
+    public int __NR_memfd_create() {
+        // memfd_create mipsel o32 4000+354
+        return 4354;
+    }
 }

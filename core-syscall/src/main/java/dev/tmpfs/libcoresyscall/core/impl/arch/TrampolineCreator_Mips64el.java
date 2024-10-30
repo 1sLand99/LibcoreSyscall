@@ -288,8 +288,13 @@ public class TrampolineCreator_Mips64el extends BaseTrampolineCreator implements
 
     @Override
     public int __NR_mprotect() {
-        // mprotect mips64el n64 5010
+        // mprotect mips64el n64 5000+10
         return 5010;
     }
 
+    @Override
+    public int __NR_memfd_create() {
+        // memfd_create mips64el n64 5000+314
+        return 5314;
+    }
 }

@@ -264,4 +264,9 @@ public class TrampolineCreator_X86_64 extends BaseTrampolineCreator implements I
         return 10;
     }
 
+    @Override
+    public int __NR_memfd_create() {
+        // memfd_create x86_64: 319
+        return 319;
+    }
 }

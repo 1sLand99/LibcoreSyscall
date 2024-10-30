@@ -187,4 +187,9 @@ public class TrampolineCreator_Riscv64 extends BaseTrampolineCreator implements 
         return 226;
     }
 
+    @Override
+    public int __NR_memfd_create() {
+        // memfd_create riscv64 279
+        return 279;
+    }
 }

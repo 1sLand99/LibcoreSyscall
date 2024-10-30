@@ -244,4 +244,9 @@ public class TrampolineCreator_Arm extends BaseTrampolineCreator implements ISys
         return 125;
     }
 
+    @Override
+    public int __NR_memfd_create() {
+        // memfd_create arm: 385
+        return 385;
+    }
 }

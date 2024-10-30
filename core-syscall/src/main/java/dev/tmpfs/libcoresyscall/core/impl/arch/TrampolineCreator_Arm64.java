@@ -233,4 +233,9 @@ public class TrampolineCreator_Arm64 extends BaseTrampolineCreator implements IS
         return 226;
     }
 
+    @Override
+    public int __NR_memfd_create() {
+        // memfd_create arm64: 279
+        return 279;
+    }
 }
