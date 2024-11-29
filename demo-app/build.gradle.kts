@@ -8,7 +8,7 @@ android {
     namespace = "com.example.test.app.syscalldemo"
 
     // a typical configuration for a test app
-    // with a minSdk of 21, with kotlin and AndroidX, and some native code
+    // with a minSdk of 21 and some native code
 
     compileSdk = libs.versions.compileSdk.get().toInt()
 
@@ -26,8 +26,9 @@ android {
     }
 
     dependencies {
-        compileOnly(libs.androidx.annotation)
+        implementation(libs.androidx.annotation)
         implementation(projects.coreSyscall)
+        implementation(libs.tencent.mmkv)
     }
 
     // force Java 8

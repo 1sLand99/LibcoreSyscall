@@ -1,14 +1,16 @@
-# Libcore-Syscall
+# Libcore-Syscall / Libcore-ElfLoader
 
-Libcore-Syscall is a Java library for Android that allows you to make any Linux system calls directly from Java code.
+Libcore-Syscall is a Java library for Android that allows you to make any Linux system calls or load any ELF shared objects directly from Java code.
 
 ## Features
 
 - Support Android 5.0 - 15
 - Support any system calls (as long as they are permitted by the seccomp filter)
+- Support loading any ELF shared objects (lib*.so) directly from memory
 - Implemented in 100% pure Java 1.8
 - No shared libraries (lib*.so) are shipped with the library
 - No `System.loadLibrary` or `System.load` is used
+- No temporary files are created on the disk (does not require a writable path/mount point)
 - Small, no dependencies
 
 ## Usage
@@ -18,10 +20,63 @@ The library provides the following classes:
 - MemoryAccess/MemoryAllocator: Allocate and read/write native memory.
 - NativeAccess: Register JNI methods, or call native functions (such as `dlopen`, `dlsym`, etc.) directly.
 - Syscall: Make any Linux system calls.
+- DlExtLibraryLoader: Load any ELF shared objects (lib*.so) directly from memory.
 
-## Example
+## Examples
 
-Here is an example of how to use the library. It calls the `uname` system call to get the system information.
+Here are some examples of possible use cases.
+
+### Load ELF Shared Object from Memory
+
+Here is an example of how to load an ELF shared object directly from memory.
+It loads the `libmmkv.so` shared object and calls the `MMKV.initialize` method.
+
+See [TestNativeLoader.java](demo-app/src/main/java/com/example/test/app/TestNativeLoader.java) for the complete example.
+
+<details>
+
+```java
+import com.tencent.mmkv.MMKV;
+
+import dev.tmpfs.libcoresyscall.core.NativeAccess;
+import dev.tmpfs.libcoresyscall.elfloader.DlExtLibraryLoader;
+
+public static long initializeMMKV(@NonNull Context ctx) {
+    String soname = "libmmkv.so";
+    // get the ELF data from somewhere
+    byte[] elfData = getElfData(soname);
+
+    // load the ELF shared object from byte array
+    // if it fails, it throws an UnsatisfiedLinkError
+    long sHandle = DlExtLibraryLoader.dlopenExtFromMemory(elfData, soname, DlExtLibraryLoader.RTLD_NOW, 0, 0);
+
+    // since dlopen from memory is not a standard function, ART does not know it
+    // we need to call JNI_OnLoad manually, as if the shared object is loaded by System.loadLibrary
+    long jniOnLoad = DlExtLibraryLoader.dlsym(sHandle, "JNI_OnLoad");
+    if (jniOnLoad != 0) {
+        long javaVm = NativeAccess.getJavaVM();
+        long ret = NativeAccess.callPointerFunction(jniOnLoad, javaVm, 0);
+        if (ret < 0) {
+            throw new RuntimeException("JNI_OnLoad failed: " + ret);
+        }
+    } else {
+        // should not happen, MMKV uses JNI_OnLoad to register native methods
+        throw new IllegalStateException("JNI_OnLoad not found");
+    }
+    // initialize MMKV, since we have already loaded the libmmkv.so from memory
+    // MMKV does not need to load the libmmkv.so shared object again
+    MMKV.initialize(ctx, libName -> {
+        // no-op
+    });
+    return sHandle;
+}
+```
+
+</details>
+
+### Make System Calls
+
+Here is an example of how to make syscalls with the library. It calls the `uname` system call to get the system information.
 
 See [TestMainActivity.java](demo-app/src/main/java/com/example/test/app/TestMainActivity.java) for the complete example.
 
@@ -93,11 +148,6 @@ To build the demo app:
 ```shell
 ./gradlew :demo-app:assembleDebug
 ```
-
-## The Future
-
-- A symbol resolver that can resolve symbols in loaded native libraries.
-- Loading arbitrary shared libraries (lib*.so) with 100% pure Java code in memory without writing it to the disk.
 
 ## Credits
 

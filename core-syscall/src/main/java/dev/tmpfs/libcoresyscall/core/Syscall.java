@@ -101,10 +101,9 @@ public class Syscall {
      *
      * @param number the syscall number
      * @param args   the arguments of the syscall, support up to 6 arguments
-     * @return the result of the syscall
-     * @throws ErrnoException if the result is an error
+     * @return the result of the syscall, or -errno if the syscall fails
      */
-    public static long syscallTempFailureRetry(long number, long... args) throws ErrnoException {
+    public static long syscallTempFailureRetryNoCheck(long number, long... args) {
         if (args.length > 6) {
             throw new IllegalArgumentException("Too many arguments: " + args.length);
         }
@@ -112,7 +111,19 @@ public class Syscall {
         do {
             result = syscallNoCheck(number, args);
         } while (result == -OsConstants.EINTR);
-        return getResultOrThrow(result, "syscall-" + number);
+        return result;
+    }
+
+    /**
+     * Call the specified syscall with the specified arguments and retry if the result is EINTR.
+     *
+     * @param number the syscall number
+     * @param args   the arguments of the syscall, support up to 6 arguments
+     * @return the result of the syscall
+     * @throws ErrnoException if the result is an error
+     */
+    public static long syscallTempFailureRetry(long number, long... args) throws ErrnoException {
+        return getResultOrThrow(syscallTempFailureRetryNoCheck(number, args), "syscall-" + number);
     }
 
     /**

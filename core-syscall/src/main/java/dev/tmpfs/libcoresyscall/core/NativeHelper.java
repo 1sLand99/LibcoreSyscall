@@ -2,6 +2,7 @@ package dev.tmpfs.libcoresyscall.core;
 
 import androidx.annotation.NonNull;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +55,14 @@ public class NativeHelper {
         return sCurrentRuntimeIsa;
     }
 
-    public static int getIsaFromElfHeader(byte[] header) {
+    /**
+     * Get the ISA value from an ELF header.
+     *
+     * @param header ELF header, must be at least 32 bytes
+     * @return ISA value
+     * @throws IllegalArgumentException if the header is not a valid ELF header
+     */
+    public static int getIsaFromElfHeader(byte[] header) throws IllegalArgumentException {
         if (header.length < 32) {
             throw new IllegalArgumentException("Invalid ELF header: length < 32");
         }
@@ -109,6 +117,39 @@ public class NativeHelper {
                 return "riscv64";
             default:
                 return "unknown(" + (isa >> 16) + ":" + (isa & 0xffff) + ")";
+        }
+    }
+
+    /**
+     * Create an ISA value from ELF class and machine.
+     *
+     * @param elfClass ELF class, either {@link #ELF_CLASS_32} or {@link #ELF_CLASS_64}
+     * @param machine  machine value
+     * @return ISA value
+     */
+    public static int forElfClassAndMachine(int elfClass, int machine) {
+        if (elfClass != ELF_CLASS_32 && elfClass != ELF_CLASS_64) {
+            throw new IllegalArgumentException("Invalid ELF class: " + elfClass);
+        }
+        if (machine <= 0 || machine > 0xffff) {
+            throw new IllegalArgumentException("Invalid machine: " + machine);
+        }
+        return (elfClass << 16) | machine;
+    }
+
+    /**
+     * Get the ISA value of an ELF file.
+     *
+     * @param file the ELF file
+     * @return the ISA value
+     * @throws IOException              if file not found or read error
+     * @throws IllegalArgumentException if the file is not an ELF file
+     */
+    public static int getElfIsaFromFile(@NonNull File file) throws IOException, IllegalArgumentException {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] header = new byte[32];
+            readExactly(fis, header, 0, header.length);
+            return getIsaFromElfHeader(header);
         }
     }
 

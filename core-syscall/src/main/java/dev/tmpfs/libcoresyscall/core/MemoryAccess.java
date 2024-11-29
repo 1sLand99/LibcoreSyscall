@@ -12,6 +12,8 @@ public class MemoryAccess {
         throw new AssertionError("no instances");
     }
 
+    private static final boolean IS_64_BIT = NativeHelper.isCurrentRuntime64Bit();
+
     public static long getPageSize() {
         return NativeBridge.getPageSize();
     }
@@ -58,8 +60,24 @@ public class MemoryAccess {
         Memory.pokeInt(address, value, false);
     }
 
-    public static short peekByte(long address) {
+    public static byte peekByte(long address) {
         return Memory.peekByte(address);
+    }
+
+    public static void pokeByte(long address, byte value) {
+        Memory.pokeByte(address, value);
+    }
+
+    public static long peekPointer(long address) {
+        return IS_64_BIT ? peekLong(address) : (peekInt(address) & 0xffffffffL);
+    }
+
+    public static void pokePointer(long address, long value) {
+        if (IS_64_BIT) {
+            pokeLong(address, value);
+        } else {
+            pokeInt(address, (int) value);
+        }
     }
 
     /**

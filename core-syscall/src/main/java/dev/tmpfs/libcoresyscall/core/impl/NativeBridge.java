@@ -4,13 +4,15 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 
+import androidx.annotation.NonNull;
+
 import java.lang.reflect.Method;
 import java.util.Map;
 
 import dev.tmpfs.libcoresyscall.core.Syscall;
+import dev.tmpfs.libcoresyscall.core.impl.trampoline.BaseShellcode;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.CommonSyscallNumberTables;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.ISyscallNumberTable;
-import dev.tmpfs.libcoresyscall.core.impl.trampoline.ITrampolineCreator;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.TrampolineCreatorFactory;
 import dev.tmpfs.libcoresyscall.core.impl.trampoline.TrampolineInfo;
 import libcore.io.Memory;
@@ -25,6 +27,7 @@ public class NativeBridge {
     private static long sTrampolineBase = 0;
     private static boolean sNativeMethodRegistered = false;
     private static boolean sTrampolineSetReadOnly = false;
+    private static BaseShellcode sShellcode = null;
 
     public static native long nativeSyscall(int number, long arg1, long arg2, long arg3, long arg4, long arg5, long arg6);
 
@@ -54,13 +57,29 @@ public class NativeBridge {
         return ps;
     }
 
+    /**
+     * Get the base address of the trampoline, this address is typically NOT useful.
+     * If the trampoline is not initialized, this method will return 0.
+     */
+    public static long getTrampolineBase() {
+        return sTrampolineBase;
+    }
+
+    @NonNull
+    public static BaseShellcode getShellcode() {
+        if (sShellcode == null) {
+            sShellcode = TrampolineCreatorFactory.create();
+        }
+        return sShellcode;
+    }
+
     public static synchronized void initializeOnce() {
         if (!sNativeMethodRegistered) {
             // 1. Get the page size.
             long pageSize = getPageSize();
             // 2. Prepare the trampoline.
-            ITrampolineCreator creator = TrampolineCreatorFactory.create();
-            TrampolineInfo trampoline = creator.generateTrampoline((int) pageSize);
+            BaseShellcode shellcode = getShellcode();
+            TrampolineInfo trampoline = shellcode.generateTrampoline();
             // 3. Allocate a memory region for the trampoline.
             final int MAP_ANONYMOUS = 0x20;
             long address;

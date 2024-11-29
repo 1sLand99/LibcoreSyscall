@@ -11,13 +11,13 @@ import dev.tmpfs.libcoresyscall.core.impl.arch.ShellcodeImpl_Riscv64;
 import dev.tmpfs.libcoresyscall.core.impl.arch.ShellcodeImpl_X86;
 import dev.tmpfs.libcoresyscall.core.impl.arch.ShellcodeImpl_X86_64;
 
-public class TrampolineCreatorFactory {
+public class SimpleInlineHookFactory {
 
-    private TrampolineCreatorFactory() {
+    private SimpleInlineHookFactory() {
         throw new AssertionError("no instances");
     }
 
-    private static final HashMap<Integer, BaseShellcode> CREATOR_MAP = new HashMap<>(7);
+    private static final HashMap<Integer, ISimpleInlineHook> CREATOR_MAP = new HashMap<>(7);
 
     static {
         // add all supported ISAs
@@ -30,12 +30,12 @@ public class TrampolineCreatorFactory {
         CREATOR_MAP.put(NativeHelper.ISA_MIPS, ShellcodeImpl_Mips32el.INSTANCE);
     }
 
-    public static BaseShellcode create() {
+    public static ISimpleInlineHook create() {
         return create(NativeHelper.getCurrentRuntimeIsa());
     }
 
-    public static BaseShellcode create(int isa) {
-        BaseShellcode creator = CREATOR_MAP.get(isa);
+    public static ISimpleInlineHook create(int isa) {
+        ISimpleInlineHook creator = CREATOR_MAP.get(isa);
         if (creator == null) {
             throw new UnsupportedOperationException("Unsupported ISA: " + NativeHelper.getIsaName(isa));
         }
