@@ -26,6 +26,10 @@ public class ByteArrayUtils {
         buffer[offset + 7] = (byte) ((value >> 56) & 0xff);
     }
 
+    public static void writeBytes(@NonNull byte[] buffer, int offset, byte... value) {
+        System.arraycopy(value, 0, buffer, offset, value.length);
+    }
+
     public static long alignDown(long value, long alignment) {
         return value & -alignment;
     }

@@ -8,7 +8,7 @@ public interface ISimpleInlineHook {
      * If an address is hooked multiple times, the result is undefined.
      * If the address is not executable, the result is undefined.
      * If the address is not at the beginning of a function, the result is undefined.
-     * If the hooked function has less than 16 bytes, the result is undefined.
+     * If the hooked function has less than 24 bytes, the result is undefined.
      *
      * @param address the address to hook
      * @param hook    where to jump
