@@ -1,15 +1,25 @@
 package com.example.test.app;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
-import android.system.ErrnoException;
+import android.os.Debug;
 import android.system.Os;
 import android.system.OsConstants;
+import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.tencent.mmkv.MMKV;
 
 import dev.tmpfs.libcoresyscall.core.IAllocatedMemory;
 import dev.tmpfs.libcoresyscall.core.MemoryAccess;
@@ -21,28 +31,88 @@ public class TestMainActivity extends Activity {
 
     private TextView mTestTextView;
 
+    private static final boolean WAIT_FOR_JAVA_DEBUGGER = false;
+    private static final boolean WAIT_FOR_NATIVE_DEBUGGER = false;
+
+    private int testCount = 0;
+
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTestTextView = new TextView(this);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.setLayoutParams(layoutParams);
         linearLayout.addView(mTestTextView);
         float dp8 = getResources().getDisplayMetrics().density * 8;
         linearLayout.setPadding((int) dp8, (int) dp8, (int) dp8, (int) dp8);
-        setContentView(linearLayout);
-        mTestTextView.setText(runTests());
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.addView(linearLayout);
+        setContentView(scrollView);
+        mTestTextView.setTextIsSelectable(true);
+        mTestTextView.setFocusable(true);
+        mTestTextView.setMovementMethod(new LinkMovementMethod());
+        new Thread(() -> {
+            // wait every thing is ready
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            // enable debug info
+            // DlExtLibraryLoader.setLdDebugVerbosity(3);
+            performTestsAsync();
+        }).start();
+    }
+
+    private void performTestsAsync() {
+        new Thread(() -> {
+            if (WAIT_FOR_NATIVE_DEBUGGER) {
+                runOnUiThread(() -> mTestTextView.setText("Waiting for native debugger...\nPID = " + Os.getpid()));
+                DebugUtils.waitForNativeDebugger();
+            }
+            if (WAIT_FOR_JAVA_DEBUGGER) {
+                runOnUiThread(() -> mTestTextView.setText("Waiting for Java debugger..."));
+                Debug.waitForDebugger();
+            }
+            String result;
+            try {
+                result = runTests();
+            } catch (Throwable e) {
+                result = Log.getStackTraceString(e);
+            }
+            updateStatus(result);
+        }).start();
+    }
+
+    private void updateStatus(String status) {
+        SpannableStringBuilder builder = new SpannableStringBuilder(status);
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                performTestsAsync();
+            }
+        };
+        builder.append("\n\n");
+        builder.append("Click here to run tests again", clickableSpan, 0);
+        runOnUiThread(() -> {
+            mTestTextView.setText(builder);
+        });
     }
 
     private String runTests() {
         StringBuilder sb = new StringBuilder();
+        sb.append("Test ").append(++testCount);
+        sb.append("\n");
         sb.append("ISA = ").append(NativeHelper.getIsaName(NativeHelper.getCurrentRuntimeIsa()));
         sb.append("\n");
         sb.append("SDK_INT = ").append(Build.VERSION.SDK_INT);
         sb.append("\n");
         sb.append("Page size = ").append(Os.sysconf(OsConstants._SC_PAGESIZE));
+        sb.append("\n");
+        sb.append("PID = ").append(Os.getpid()).append(", PPID = ").append(Os.getppid()).append(", UID = ").append(Os.getuid());
         sb.append("\n");
         int __NR_uname;
         switch (NativeHelper.getCurrentRuntimeIsa()) {
@@ -99,8 +169,13 @@ public class TestMainActivity extends Activity {
             sb.append("\n");
             sb.append("domainname = ").append(MemoryAccess.peekCString(utsAddress + domainnameOffset));
             sb.append("\n");
-        } catch (ErrnoException e) {
-            sb.append("ErrnoException: ").append(e.getMessage());
+            sb.append("Native load test: \n");
+            sb.append("handle = ").append(TestNativeLoader.load(this));
+            sb.append("\n");
+            sb.append("MMKV.version = ").append(MMKV.version());
+        } catch (Exception | LinkageError | AssertionError e) {
+            sb.append('\n').append("FAIL: \n").append(Log.getStackTraceString(e));
+            Log.e("TestMainActivity", "runTests", e);
         }
         return sb.toString();
     }
