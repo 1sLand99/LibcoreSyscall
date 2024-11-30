@@ -6,6 +6,7 @@ import android.system.OsConstants;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import dev.tmpfs.libcoresyscall.core.impl.ReflectHelper;
 
@@ -18,9 +19,7 @@ public class MemoryAllocator {
     private static final long PAGE_SIZE = (int) MemoryAccess.getPageSize();
 
     // We use 16 bytes alignment for the allocated memory.
-    // Use call 16 bytes as a unit.
-    private static final int UNIT_SIZE = 16;
-    private static final int UNIT_PER_PAGE = (int) (PAGE_SIZE / UNIT_SIZE);
+    private static final int ALLOCATE_UNIT_SIZE = 16;
 
     // The memory block is big, and we can't allocate it in one page.
     private static class DirectPageMemory implements IAllocatedMemory {
@@ -66,14 +65,14 @@ public class MemoryAllocator {
         }
     }
 
-    // The memory block is not big, and we can split it into units.
-    private static class UnitMemory implements IAllocatedMemory {
+    // The memory block is not big, and we can allocate many blocks in one page.
+    private static class ArenaBlockMemory implements IAllocatedMemory {
 
         private volatile long mAddress;
         private volatile long mSize;
         private volatile long mAllocatedSize;
 
-        private UnitMemory(long address, long size, long allocatedSize) {
+        private ArenaBlockMemory(long address, long size, long allocatedSize) {
             mAddress = address;
             mSize = size;
             mAllocatedSize = allocatedSize;
@@ -92,7 +91,7 @@ public class MemoryAllocator {
         @Override
         public synchronized void free() {
             if (mAddress != 0) {
-                freeUnitMemory(mAddress, mAllocatedSize);
+                freeArenaMemory(mAddress, mAllocatedSize);
                 mAddress = 0;
                 mSize = 0;
                 mAllocatedSize = 0;
@@ -134,58 +133,50 @@ public class MemoryAllocator {
         }
     }
 
-    private static class PageUnitInfo {
+    private static class ArenaInfo {
         // The address of the page.
-        public long address;
-        // Allocated units, sorted, [unit index, unit count].
-        // The unit index is the index of first unit, that is (address - page address) / UNIT_SIZE.
-        public ArrayList<int[]> allocatedUnits = new ArrayList<>();
+        public long startAddress;
+        // Allocated block [address, alloc size].
+        public final HashSet<long[]> allocatedAddress = new HashSet<>();
 
-        public PageUnitInfo(long address) {
-            this.address = address;
+        // next free address in the page.
+        public long nextFreeAddress;
+
+        // end address of the page, exclusive, that is, startAddress + PAGE_SIZE.
+        public long endAddress;
+
+        public ArenaInfo(long pageAddress) {
+            this.startAddress = pageAddress;
+            this.nextFreeAddress = pageAddress;
+            this.endAddress = pageAddress + PAGE_SIZE;
         }
 
     }
 
-    private static final Object sUnitAllocLock = new Object();
+    private static final Object sArenaAllocLock = new Object();
     // A list of memory page, sorted by address.
-    private static final ArrayList<PageUnitInfo> sUnitMemoryPageList = new ArrayList<>();
+    private static final ArrayList<ArenaInfo> sArenaPageList = new ArrayList<>();
 
     /**
-     * Find a memory page that has enough free units. If not found, return null.
+     * Find a arena memory page that has enough free memory. If not found, return null.
      */
-    private static UnitMemory tryAllocateMemoryUnitLocked(int unitCount, int requestedSize) {
-        for (PageUnitInfo page : sUnitMemoryPageList) {
-            if (page.allocatedUnits.isEmpty()) {
-                // the page is empty, allocate the first unit.
-                if (unitCount <= UNIT_PER_PAGE) {
-                    page.allocatedUnits.add(new int[]{0, unitCount});
-                    long address = page.address;
-                    return new UnitMemory(address, requestedSize, (long) unitCount * UNIT_SIZE);
-                }
-            } else {
-                // find a page that has enough free units.
-                // find first in gap, and then tail.
-                for (int gapIndex = 0; gapIndex < page.allocatedUnits.size(); gapIndex++) {
-                    int[] thisUnit = page.allocatedUnits.get(gapIndex);
-                    int[] nextUnit = gapIndex + 1 < page.allocatedUnits.size() ?
-                            page.allocatedUnits.get(gapIndex + 1) : null;
-                    int gapStart = thisUnit[0] + thisUnit[1];
-                    int gapEnd = (nextUnit != null) ? nextUnit[0] : UNIT_PER_PAGE;
-                    // check if the gap is enough.
-                    if (gapEnd - gapStart >= unitCount) {
-                        page.allocatedUnits.add(gapIndex, new int[]{gapStart, unitCount});
-                        long address = page.address + (long) gapStart * UNIT_SIZE;
-                        return new UnitMemory(address, requestedSize, (long) unitCount * UNIT_SIZE);
-                    }
-                }
+    private static ArenaBlockMemory tryAllocateArenaMemoryLocked(int allocateSize, int requestedSize) {
+        if (allocateSize % 16 != 0) {
+            throw new AssertionError("allocateSize must be 16 bytes aligned");
+        }
+        for (ArenaInfo info : sArenaPageList) {
+            if (info.nextFreeAddress + allocateSize <= info.endAddress) {
+                long address = info.nextFreeAddress;
+                info.nextFreeAddress += allocateSize;
+                info.allocatedAddress.add(new long[]{address, allocateSize});
+                return new ArenaBlockMemory(address, requestedSize, allocateSize);
             }
         }
         return null;
     }
 
-    private static void brkNewPageForUnitAllocationLocked() {
-        // We need to allocate a new page for unit allocation.
+    private static void brkNewPageForArenaAllocationLocked() {
+        // We need to allocate a new page for arena allocation.
         final int MAP_ANONYMOUS = 0x20;
         try {
             long address = Os.mmap(0, PAGE_SIZE, OsConstants.PROT_READ | OsConstants.PROT_WRITE,
@@ -193,61 +184,88 @@ public class MemoryAllocator {
             if (address == 0) {
                 throw new AssertionError("mmap failed with size " + PAGE_SIZE + ", but no errno");
             }
-            synchronized (sUnitAllocLock) {
-                sUnitMemoryPageList.add(new PageUnitInfo(address));
+            synchronized (sArenaAllocLock) {
+                sArenaPageList.add(new ArenaInfo(address));
             }
         } catch (ErrnoException e) {
             throw ReflectHelper.unsafeThrow(e);
         }
     }
 
-    private static UnitMemory allocateUnitMemory(int requestedSize) {
-        if (requestedSize + UNIT_SIZE >= PAGE_SIZE) {
+    private static ArenaBlockMemory allocateArenaMemory(int requestedSize) {
+        if (requestedSize + ALLOCATE_UNIT_SIZE >= PAGE_SIZE) {
             // should not happen.
             throw new AssertionError("requested size is too big");
         }
         // align the size to unit size.
-        final int allocateSizeBytes = (requestedSize + UNIT_SIZE - 1) & -UNIT_SIZE;
-        final int allocateUnitCount = Math.max(allocateSizeBytes / UNIT_SIZE, 1);
-        synchronized (sUnitAllocLock) {
-            UnitMemory memory = tryAllocateMemoryUnitLocked(allocateUnitCount, requestedSize);
+        final int allocateSizeBytes = (requestedSize + ALLOCATE_UNIT_SIZE - 1) & -ALLOCATE_UNIT_SIZE;
+        synchronized (sArenaAllocLock) {
+            ArenaBlockMemory memory = tryAllocateArenaMemoryLocked(allocateSizeBytes, requestedSize);
             if (memory != null) {
                 return memory;
             }
-            brkNewPageForUnitAllocationLocked();
-            memory = tryAllocateMemoryUnitLocked(allocateUnitCount, requestedSize);
+            brkNewPageForArenaAllocationLocked();
+            memory = tryAllocateArenaMemoryLocked(allocateSizeBytes, requestedSize);
             if (memory != null) {
                 return memory;
             }
-            throw new AssertionError("failed to allocate unit memory, this should not happen");
+            throw new AssertionError("failed to allocate arena memory, this should not happen");
         }
     }
 
-    private static void freeUnitMemory(long address, long allocatedSize) {
-        synchronized (sUnitAllocLock) {
+    private static void freeArenaMemory(long address, long allocatedSize) {
+        synchronized (sArenaAllocLock) {
             // find the page that contains the address.
-            PageUnitInfo page = null;
-            for (PageUnitInfo info : sUnitMemoryPageList) {
-                if (address >= info.address && address < info.address + PAGE_SIZE) {
-                    page = info;
-                    break;
-                }
-            }
-            if (page == null) {
+            long pageAddress = address & -PAGE_SIZE;
+            if (pageAddress == 0) {
                 throw new AssertionError("invalid address to free");
             }
-            // find the unit index.
-            final int unitIndex = (int) ((address - page.address) / UNIT_SIZE);
-            // remove the unit from the allocated list.
-            for (int i = 0; i < page.allocatedUnits.size(); i++) {
-                int[] unit = page.allocatedUnits.get(i);
-                if (unit[0] == unitIndex) {
-                    page.allocatedUnits.remove(i);
+            // find the arena info.
+            ArenaInfo arenaInfo = null;
+            for (ArenaInfo info : sArenaPageList) {
+                if (info.startAddress == pageAddress) {
+                    arenaInfo = info;
                     break;
                 }
             }
-            // do not free the page, keep the logic simple.
+            if (arenaInfo == null) {
+                throw new AssertionError("invalid address to free: address=" + address);
+            }
+            // remove the allocated address.
+            boolean found = false;
+            for (long[] allocated : arenaInfo.allocatedAddress) {
+                if (allocated[0] == address) {
+                    arenaInfo.allocatedAddress.remove(allocated);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new AssertionError("invalid address to free: address=" + address);
+            }
+            // free the page if it's empty.
+            if (arenaInfo.allocatedAddress.isEmpty()) {
+                freeArenaPageLocked(pageAddress);
+            }
         }
+    }
+
+    private static void freeArenaPageLocked(long arenaPageAddress) {
+        for (ArenaInfo info : sArenaPageList) {
+            if (info.startAddress == arenaPageAddress) {
+                if (!info.allocatedAddress.isEmpty()) {
+                    throw new AssertionError("page is not empty");
+                }
+                sArenaPageList.remove(info);
+                try {
+                    Os.munmap(arenaPageAddress, PAGE_SIZE);
+                } catch (ErrnoException e) {
+                    throw ReflectHelper.unsafeThrow(e);
+                }
+                return;
+            }
+        }
+        throw new AssertionError("page not found");
     }
 
     /**
@@ -263,7 +281,7 @@ public class MemoryAllocator {
             // anonymous memory maps are zeroed by default.
             return allocateDirectPageMemory(size);
         } else {
-            IAllocatedMemory mem = allocateUnitMemory((int) size);
+            IAllocatedMemory mem = allocateArenaMemory((int) size);
             // it may be used multiple times, so zero it here.
             if (zeroed) {
                 MemoryAccess.memset(mem.getAddress(), 0, size);
