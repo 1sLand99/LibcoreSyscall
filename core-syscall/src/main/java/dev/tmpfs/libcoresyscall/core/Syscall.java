@@ -164,4 +164,14 @@ public class Syscall {
         }
     }
 
+    public static long ioctl(int fd, int request, long arg) throws ErrnoException {
+        long res = syscall(CommonSyscallNumberTables.get().__NR_ioctl(), fd, request, arg);
+        return getResultOrThrow(res, "ioctl");
+    }
+
+    public static int tgkill(int tgid, int tid, int sig) throws ErrnoException {
+        long res = syscall(CommonSyscallNumberTables.get().__NR_tgkill(), tgid, tid, sig);
+        return (int) getResultOrThrow(res, "tgkill");
+    }
+
 }

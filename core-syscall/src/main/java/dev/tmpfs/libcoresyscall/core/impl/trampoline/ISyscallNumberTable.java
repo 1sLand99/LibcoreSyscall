@@ -6,4 +6,8 @@ public interface ISyscallNumberTable {
 
     int __NR_memfd_create();
 
+    int __NR_tgkill();
+
+    int __NR_ioctl();
+
 }

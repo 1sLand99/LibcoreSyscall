@@ -127,6 +127,18 @@ public class ShellcodeImpl_Riscv64 extends BaseShellcode implements ISimpleInlin
     }
 
     @Override
+    public int __NR_ioctl() {
+        // ioctl riscv64 29
+        return 29;
+    }
+
+    @Override
+    public int __NR_tgkill() {
+        // tgkill riscv64 131
+        return 131;
+    }
+
+    @Override
     public void inlineHook(long address, long hook) {
         if (address == 0) {
             throw new IllegalArgumentException("address is 0");

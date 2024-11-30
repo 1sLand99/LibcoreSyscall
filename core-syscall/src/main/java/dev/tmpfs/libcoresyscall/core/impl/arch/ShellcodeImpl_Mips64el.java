@@ -159,6 +159,18 @@ public class ShellcodeImpl_Mips64el extends BaseShellcode implements ISimpleInli
     }
 
     @Override
+    public int __NR_ioctl() {
+        // ioctl mips64el n64 5000+15
+        return 5015;
+    }
+
+    @Override
+    public int __NR_tgkill() {
+        // tgkill mips64el n64 5000+225
+        return 5225;
+    }
+
+    @Override
     public void inlineHook(long address, long hook) {
         // TODO: 2024-11-29 implement inline hook for mips64 if anyone really needs it
         throw new UnsupportedOperationException("Not implemented");

@@ -134,6 +134,18 @@ public class ShellcodeImpl_X86_64 extends BaseShellcode implements ISimpleInline
     }
 
     @Override
+    public int __NR_ioctl() {
+        // ioctl x86_64: 16
+        return 16;
+    }
+
+    @Override
+    public int __NR_tgkill() {
+        // tgkill x86_64: 234
+        return 234;
+    }
+
+    @Override
     public void inlineHook(long address, long hook) {
         if (address == 0) {
             throw new IllegalArgumentException("address is 0");

@@ -138,6 +138,18 @@ public class ShellcodeImpl_Arm64 extends BaseShellcode implements ISimpleInlineH
     }
 
     @Override
+    public int __NR_ioctl() {
+        // ioctl arm64: 29
+        return 29;
+    }
+
+    @Override
+    public int __NR_tgkill() {
+        // tgkill arm64: 131
+        return 131;
+    }
+
+    @Override
     public void inlineHook(long address, long hook) {
         if (address == 0) {
             throw new IllegalArgumentException("address is 0");

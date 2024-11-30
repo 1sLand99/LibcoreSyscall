@@ -155,6 +155,18 @@ public class ShellcodeImpl_Mips32el extends BaseShellcode implements ISimpleInli
     }
 
     @Override
+    public int __NR_ioctl() {
+        // ioctl mipsel o32 4000+54
+        return 4054;
+    }
+
+    @Override
+    public int __NR_tgkill() {
+        // tgkill mipsel o32 4000+266
+        return 4266;
+    }
+
+    @Override
     public void inlineHook(long address, long hook) {
         // TODO: 2024-11-29 implement inline hook for mips if anyone really needs it
         throw new UnsupportedOperationException("Not implemented");
