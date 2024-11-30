@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 
+import dalvik.annotation.optimization.CriticalNative;
 import dev.tmpfs.libcoresyscall.core.NativeHelper;
 import libcore.io.Memory;
 import sun.misc.Unsafe;
@@ -250,6 +251,9 @@ public class ArtMethodHelper {
 
         native void nativeNeverCall();
 
+        @CriticalNative
+        static native void nativeNeverCallCritical();
+
     }
 
     private static long sArtJniDlsymLookupStub = 0;
@@ -273,13 +277,42 @@ public class ArtMethodHelper {
         return sArtJniDlsymLookupStub;
     }
 
+    private static long sArtJniDlsymLookupCriticalStub = 0;
+
+    public static long getJniDlsymLookupCriticalStub() {
+        if (sArtJniDlsymLookupCriticalStub != 0) {
+            return sArtJniDlsymLookupCriticalStub;
+        }
+        Method nativeNeverCallCritical;
+        try {
+            nativeNeverCallCritical = NeverCall.class.getDeclaredMethod("nativeNeverCallCritical");
+        } catch (NoSuchMethodException e) {
+            // should not happen
+            throw ReflectHelper.unsafeThrow(e);
+        }
+        long entryPoint = getArtMethodEntryPointFromJniRaw(nativeNeverCallCritical);
+        if (entryPoint == 0) {
+            throw new IllegalStateException("unable to get ArtMethod::entry_point_from_jni_ for " + nativeNeverCallCritical);
+        }
+        sArtJniDlsymLookupCriticalStub = entryPoint;
+        return sArtJniDlsymLookupCriticalStub;
+    }
+
     public static void unregisterNativeMethod(@NonNull Member method) {
+        // FIXME: 2024-11-30 critical native method should be set to
+        //  art_jni_dlsym_lookup_critical_stub instead of art_jni_dlsym_lookup_stub
         registerNativeMethod(method, getJniDlsymLookupStub());
     }
 
     public static long getRegisteredNativeMethod(@NonNull Member method) {
+        if (!(method instanceof Method) && !(method instanceof Constructor)) {
+            throw new IllegalArgumentException("method must be a method or constructor: " + method);
+        }
+        if (!Modifier.isNative(method.getModifiers())) {
+            throw new IllegalArgumentException("method must be native: " + method);
+        }
         long entryPoint = getArtMethodEntryPointFromJniRaw(method);
-        if (entryPoint == getJniDlsymLookupStub()) {
+        if (entryPoint == getJniDlsymLookupStub() || entryPoint == getJniDlsymLookupCriticalStub()) {
             return 0;
         }
         return entryPoint;

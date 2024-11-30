@@ -59,8 +59,6 @@ public class NativeAccess {
 
     /**
      * Register a native method for the specified method/constructor.
-     * <p>
-     * Warning: This method should not be used to register native methods annotated with @FastNative or @CriticalNative.
      *
      * @param member         the method/constructor reflect object
      * @param nativeFunction the jni native function pointer
@@ -71,8 +69,6 @@ public class NativeAccess {
 
     /**
      * Unregister a native method for the specified method/constructor.
-     * <p>
-     * Warning: This method should not be used to unregister native methods annotated with @FastNative or @CriticalNative.
      *
      * @param method the method/constructor reflect object
      */
@@ -82,8 +78,6 @@ public class NativeAccess {
 
     /**
      * Get the registered native method for the specified method/constructor.
-     * <p>
-     * Warning: This method should not be used to get native methods annotated with @FastNative or @CriticalNative.
      *
      * @param method the method/constructor reflect object
      * @return the registered native function pointer, or 0 if not registered
