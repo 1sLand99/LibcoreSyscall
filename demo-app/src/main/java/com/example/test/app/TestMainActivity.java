@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.text.SpannableStringBuilder;
@@ -21,11 +22,15 @@ import androidx.annotation.Nullable;
 
 import com.tencent.mmkv.MMKV;
 
+import java.io.FileInputStream;
+
 import dev.tmpfs.libcoresyscall.core.IAllocatedMemory;
 import dev.tmpfs.libcoresyscall.core.MemoryAccess;
 import dev.tmpfs.libcoresyscall.core.MemoryAllocator;
 import dev.tmpfs.libcoresyscall.core.NativeHelper;
 import dev.tmpfs.libcoresyscall.core.Syscall;
+import dev.tmpfs.libcoresyscall.core.impl.ReflectHelper;
+import dev.tmpfs.libcoresyscall.core.impl.trampoline.CommonSyscallNumberTables;
 
 public class TestMainActivity extends Activity {
 
@@ -49,6 +54,7 @@ public class TestMainActivity extends Activity {
         float dp8 = getResources().getDisplayMetrics().density * 8;
         linearLayout.setPadding((int) dp8, (int) dp8, (int) dp8, (int) dp8);
         ScrollView scrollView = new ScrollView(this);
+        scrollView.setFitsSystemWindows(true);
         scrollView.addView(linearLayout);
         setContentView(scrollView);
         mTestTextView.setTextIsSelectable(true);
@@ -109,6 +115,8 @@ public class TestMainActivity extends Activity {
         sb.append("ISA = ").append(NativeHelper.getIsaName(NativeHelper.getCurrentRuntimeIsa()));
         sb.append("\n");
         sb.append("SDK_INT = ").append(Build.VERSION.SDK_INT);
+        sb.append("\n");
+        sb.append("Build.VERSION.CODENAME = ").append(Build.VERSION.CODENAME);
         sb.append("\n");
         sb.append("Page size = ").append(Os.sysconf(OsConstants._SC_PAGESIZE));
         sb.append("\n");
@@ -176,6 +184,50 @@ public class TestMainActivity extends Activity {
         } catch (Exception | LinkageError | AssertionError e) {
             sb.append('\n').append("FAIL: \n").append(Log.getStackTraceString(e));
             Log.e("TestMainActivity", "runTests", e);
+        }
+        sb.append("\n");
+        sb.append("cat /proc/self/maps | grep libmmkv.so\n");
+        sb.append(catProcSelfMapsAndGrep("libmmkv.so"));
+        return sb.toString();
+    }
+
+    private static void testSyscallConsistency() {
+        int SIGABRT = 6;
+        int NR_tgkill = CommonSyscallNumberTables.get().__NR_tgkill();
+        int tid = Os.gettid();
+        int pid = Os.getpid();
+        String msg;
+        long[] args = new long[]{pid, tid, SIGABRT, 0x33333333, 0x44444444, 0x55555555};
+        if (NativeHelper.isCurrentRuntime64Bit()) {
+            msg = String.format("a0 = %016x, a1 = %016x, a2 = %016x, \na3 = %016x, a4 = %016x, a5 = %016x",
+                    args[0], args[1], args[2], args[3], args[4], args[5]);
+        } else {
+            msg = String.format("a0 = %08x, a1 = %08x, a2 = %08x, \na3 = %08x, a4 = %08x, a5 = %08x",
+                    args[0], args[1], args[2], args[3], args[4], args[5]);
+        }
+        Log.e("TestMainActivity", "testSyscallConsistency: \n" + msg);
+        try {
+            // check whether syscall arguments are filled in the correct registers
+            Syscall.syscall(NR_tgkill, args);
+            // go to logcat and check the crashdump for the registers
+        } catch (ErrnoException e) {
+            throw ReflectHelper.unsafeThrow(e);
+        }
+        throw new AssertionError("tgkill should not return");
+    }
+
+    private static String catProcSelfMapsAndGrep(String grep) {
+        StringBuilder sb = new StringBuilder();
+        try (FileInputStream fis = new FileInputStream("/proc/self/maps");
+             java.util.Scanner scanner = new java.util.Scanner(fis)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.contains(grep)) {
+                    sb.append(line).append('\n');
+                }
+            }
+        } catch (Exception e) {
+            sb.append(Log.getStackTraceString(e));
         }
         return sb.toString();
     }
