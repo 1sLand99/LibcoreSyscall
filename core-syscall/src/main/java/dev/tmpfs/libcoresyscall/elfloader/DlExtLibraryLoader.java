@@ -22,6 +22,7 @@ import dev.tmpfs.libcoresyscall.core.MemoryAccess;
 import dev.tmpfs.libcoresyscall.core.MemoryAllocator;
 import dev.tmpfs.libcoresyscall.core.NativeAccess;
 import dev.tmpfs.libcoresyscall.core.NativeHelper;
+import dev.tmpfs.libcoresyscall.core.Syscall;
 import dev.tmpfs.libcoresyscall.core.impl.FileDescriptorHelper;
 import dev.tmpfs.libcoresyscall.core.impl.NativeBridge;
 import dev.tmpfs.libcoresyscall.core.impl.ReflectHelper;
@@ -510,6 +511,11 @@ public class DlExtLibraryLoader {
             sSavedTargetSdkVersion = -1;
         }
 
+    }
+
+    private static long getAshmemRegionSize(int fd) throws ErrnoException {
+        int ASHMEM_GET_SIZE = 0x7704;
+        return Syscall.ioctl(fd, ASHMEM_GET_SIZE, 0);
     }
 
 }
