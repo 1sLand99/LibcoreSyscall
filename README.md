@@ -33,8 +33,6 @@ It loads the `libmmkv.so` shared object and calls the `MMKV.initialize` method.
 
 See [TestNativeLoader.java](demo-app/src/main/java/com/example/test/app/TestNativeLoader.java) for the complete example.
 
-<details>
-
 ```java
 import com.tencent.mmkv.MMKV;
 
@@ -72,15 +70,11 @@ public static long initializeMMKV(@NonNull Context ctx) {
 }
 ```
 
-</details>
-
 ### Make System Calls
 
 Here is an example of how to make syscalls with the library. It calls the `uname` system call to get the system information.
 
 See [TestMainActivity.java](demo-app/src/main/java/com/example/test/app/TestMainActivity.java) for the complete example.
-
-<details>
 
 ```java
 import dev.tmpfs.libcoresyscall.core.IAllocatedMemory;
@@ -119,8 +113,6 @@ public String unameDemo() {
     return sb.toString();
 }
 ```
-
-</details>
 
 ## The Tricks
 
