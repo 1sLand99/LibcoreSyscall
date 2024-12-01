@@ -73,6 +73,7 @@ public class TestMainActivity extends Activity {
         }).start();
     }
 
+    @SuppressLint("SetTextI18n")
     private void performTestsAsync() {
         new Thread(() -> {
             if (WAIT_FOR_NATIVE_DEBUGGER) {
@@ -114,9 +115,13 @@ public class TestMainActivity extends Activity {
         sb.append("\n");
         sb.append("ISA = ").append(NativeHelper.getIsaName(NativeHelper.getCurrentRuntimeIsa()));
         sb.append("\n");
-        sb.append("SDK_INT = ").append(Build.VERSION.SDK_INT);
-        sb.append("\n");
-        sb.append("Build.VERSION.CODENAME = ").append(Build.VERSION.CODENAME);
+        sb.append("SDK_INT = ");
+        if ("REL".equals(Build.VERSION.CODENAME)) {
+            sb.append(Build.VERSION.SDK_INT);
+        } else {
+            // dev preview
+            sb.append(Build.VERSION.CODENAME).append(" ").append(Build.VERSION.SDK_INT);
+        }
         sb.append("\n");
         sb.append("Page size = ").append(Os.sysconf(OsConstants._SC_PAGESIZE));
         sb.append("\n");
@@ -128,6 +133,7 @@ public class TestMainActivity extends Activity {
                 __NR_uname = 63;
                 break;
             case NativeHelper.ISA_ARM64:
+            case NativeHelper.ISA_RISCV64:
                 __NR_uname = 160;
                 break;
             case NativeHelper.ISA_X86:

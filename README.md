@@ -1,14 +1,16 @@
 # Libcore-Syscall / Libcore-ElfLoader
 
-Libcore-Syscall is a Java library for Android that allows you to make any Linux system calls and/or load any ELF shared objects directly from Java code.
+Libcore-Syscall is a pure Java library for Android that allows you to make any Linux system calls and/or
+load any in-memory ELF shared objects (lib*.so) without a writable path/mount point.
 
 ## Features
 
 - Support Android 5.0 - 15
 - Support any system calls (as long as they are permitted by the seccomp filter)
-- Support loading any ELF shared objects (lib*.so) directly from memory
+- Support loading in-memory ELF shared objects (lib*.so) without a file
+- Support arm/arm64/x86/x86_64/riscv64 architectures
 - Implemented in 100% pure Java 1.8
-- No shared libraries (lib*.so) are shipped with the library
+- No shared libraries (lib*.so) or assets files are shipped with the library
 - No `System.loadLibrary` or `System.load` is used
 - No temporary files are created on the disk (does not require a writable path/mount point)
 - Small, no dependencies
