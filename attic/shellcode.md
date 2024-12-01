@@ -278,7 +278,7 @@ LSS_REG(4, arg1); LSS_REG(5, arg2); LSS_REG(6, arg3);
 
 ## Clear Cache
 
-Since we are using the `__clear_cache` function, we need to define it ourselves since there is no libc.
+While the `__clear_cache` function is used without libc, a platform-specific implementation is needed.
 
 ```c
 #if !defined(assert)
@@ -396,11 +396,11 @@ void __clear_cache(void* start, void* end) {
 
 ```
 
-## Runtime-Time Known Data
+## Readonly Data
 
 To make things easier, the shellcode should only have a `.text` section,
 and no `.data`/`.bss`/`.rodata`/`.got`/`.plt` sections.
-Let's fill the runtime-known data in the `.text` section from the Java side.
+The readonly data in the `.text` section can be populated from Java side at runtime.
 
 ```c
 
