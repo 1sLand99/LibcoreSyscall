@@ -11,6 +11,8 @@ android {
 
     defaultConfig {
         minSdk = 21
+
+        consumerProguardFiles("proguard-rules.pro")
     }
 
     buildFeatures {
