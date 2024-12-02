@@ -1,0 +1,6 @@
+#ifndef LIBCORE_SHELLCODE_LSS_WRAPPER_H
+#define LIBCORE_SHELLCODE_LSS_WRAPPER_H
+
+#include <linux_syscall_support.h>
+
+#endif //LIBCORE_SHELLCODE_LSS_WRAPPER_H
