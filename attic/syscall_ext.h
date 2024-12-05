@@ -20,11 +20,29 @@ static inline bool is_error(void* res) {
     return is_error(reinterpret_cast<uintptr_t>(res));
 }
 
+static inline int errno_of(uintptr_t res) {
+    if (is_error(res)) {
+        return -(int) (ptrdiff_t) res;
+    }
+    return 0;
+}
+
+static inline int errno_of(void* res) {
+    return errno_of(reinterpret_cast<uintptr_t>(res));
+}
+
 #else
 
 static inline int is_error(uintptr_t res) {
     auto r = (ptrdiff_t) res;
     return r < 0 && r >= -4095;
+}
+
+static inline int errno_of(uintptr_t res) {
+    if (is_error(res)) {
+        return -(int) (ptrdiff_t) res;
+    }
+    return 0;
 }
 
 #endif
