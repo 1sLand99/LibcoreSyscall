@@ -132,18 +132,18 @@ public String unameDemo() {
 
 ## FAQ
 
-- Q: How to use this library in an Xposed in my project?  
+- Q: How can I use this library in an Xposed in my project?  
   A: You can either download the prebuilt AAB artifact from the [Releases](https://github.com/cinit/LibcoreSyscall/releases) page,
   build the library yourself and include the AAR artifact in your project, or add this repository as a submodule to your project.
 
-- Q: I found that this repository does contain some C++ code. Didn't you say that it's written in 100% pure Java 1.8?  
-  A: The C++ code is only used for the shellcode generation. The shellcode is then embedded in the Java code as a base64 string.
-  The C++ code does not need to be compiled when you build the library, and no NDK is required to build the library.
-  The library itself can be compiled into a single dex file (version 035) without any extra resource/so files,
+- Q: I found that this repository does contain some C++ code. Didn't you say it's written in 100% pure Java 1.8?  
+  A: The C++ code is only used for the shellcode generation. The shellcode is then embedded in the Java code as base64 strings.
+  The C++ code does not need to be compiled when you build the library, and no NDK is required either.
+  The library itself can be compiled into a single dex file (version 035) without any extra resource/so files
   and can be loaded into an InMemoryDexClassLoader directly.
 
 - Q: Can I use this library to bypass the seccomp filter or SELinux policy?  
-  A: No. The seccomp filter and SELinux policy are security mechanisms that are enforced by the kernel.
+  A: No. The seccomp filter and SELinux policy are security mechanisms enforced by the kernel.
   This library does not bypass these security mechanisms. It only provides a way to access some native features that are not exposed by the Android SDK.
 
 - Q: Can I use this library to run arbitrary native code in the system_server process?  
@@ -154,12 +154,12 @@ public String unameDemo() {
 
 - Q: Is this library well-tested?  
   A: No. This library is only a Proof of Concept. I have tested it on emulators API 21-35 and ABI arm/arm64/x86/x86_64/riscv64.
-  But I cannot guarantee that it will work on all real-world devices. It may crash everywhere. Use it at your own risk.
+  However, I cannot guarantee that it will work on all real-world devices. It may crash everywhere. Use it at your own risk.
   I believe that this library SHOULD NOT be used in production code.
 
 - Q: I have found that there are some code snippets for mips/mips64 architecture in the library. Can I use it on mips/mips64 devices?  
-  A: No. These mips/mips64 code snippets are actually unfinished and untested.
-  I really doubt whether there is any real-world mip/mips64 device that can run Android 5.0+.
+  A: No. These mips/mips64 code snippets are unfinished and untested.
+  I doubt whether there is any real-world mip/mips64 device that can run Android 5.0+.
   If you do really need to use this library on mips/mips64 devices, you can try to add the mips/mips64 architecture support by yourself.
 
 ## Build
