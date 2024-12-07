@@ -184,7 +184,7 @@ public class TestMainActivity extends Activity {
             sb.append("domainname = ").append(MemoryAccess.peekCString(utsAddress + domainnameOffset));
             sb.append("\n");
             sb.append("Native load test: \n");
-            sb.append("handle = ").append(TestNativeLoader.load(this));
+            sb.append("handle = ").append(TestNativeLoader.initialize(this));
             sb.append("\n");
             sb.append("MMKV.version = ").append(MMKV.version());
         } catch (Exception | LinkageError | AssertionError e) {

@@ -101,7 +101,18 @@ public class TestNativeLoader {
         return fd;
     }
 
-    public static long load(@NonNull Context ctx) {
+    public static long initialize(@NonNull Context ctx) {
+        load();
+        if (sHandle != 0) {
+            MMKV.initialize(ctx, libName -> {
+                // no-op
+            });
+            return sHandle;
+        }
+        return 0;
+    }
+
+    public static long load() {
         if (sHandle != 0) {
             return sHandle;
         }
@@ -119,9 +130,6 @@ public class TestNativeLoader {
                     throw new IllegalStateException("JNI_OnLoad failed: " + ret);
                 }
             }
-            MMKV.initialize(ctx, libName -> {
-                // no-op
-            });
         }
         return sHandle;
     }
