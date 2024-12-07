@@ -25,27 +25,27 @@ EXPORT void* fake_mmap64(void* const addr, const size_t length, const int prot,
     bool isInTmpfsForExec = false;
     bool isAshmem = false;
     bool useFallbackMapThenCopy = false;
-    uint64_t fileSize = 0;
+    [[maybe_unused]] uint64_t fileSize = 0;
     if (fd >= 0 && (flags & MAP_PRIVATE) != 0 && (flags & MAP_ANONYMOUS) == 0) {
         // we need have an eye on MAP_PRIVATE on ashmem because it is not supported
         // check if the fd is an ashmem fd
         kernel_stat64_compat stat = {0};
         if (fake_fstat64(fd, &stat) == 0) {
+            fileSize = stat.st_size;
             if (stat.st_dev == info->ashmem_dev_v && info->ashmem_dev_v != 0) {
                 // since ashmem does not support MAP_PRIVATE, we need to manually handle it
                 // if the later mmap succeeds, we need to copy the content from the ashmem with pread64
                 isAshmem = true;
                 useFallbackMapThenCopy = true;
-                fileSize = stat.st_size;
             }
-        }
-        if ((prot & PROT_EXEC) != 0) {
-            // system_server do not have mmap executable permission on memfd
-            // if system_server does have execmem, transform a memfd-exec-mapping into an anonymous-exec-mapping
-            kernel_statfs64_compat fs = {0};
-            if (lsw_fstatfs64(fd, &fs) == 0) {
-                if (fs.f_type == TMPFS_MAGIC) {
-                    isInTmpfsForExec = true;
+            if ((prot & PROT_EXEC) != 0) {
+                // system_server do not have mmap executable permission on memfd
+                // if system_server does have execmem, transform a memfd-exec-mapping into an anonymous-exec-mapping
+                kernel_statfs64_compat fs = {0};
+                if (lsw_fstatfs64(fd, &fs) == 0) {
+                    if (fs.f_type == TMPFS_MAGIC) {
+                        isInTmpfsForExec = true;
+                    }
                 }
             }
         }
@@ -113,7 +113,7 @@ EXPORT void* fake_mmap64(void* const addr, const size_t length, const int prot,
     }
     if (useFallbackMapThenCopy) {
         uint64_t off = offset;
-        uint64_t remaining = fileSize;
+        uint64_t remaining = length;
         void* p = (void*) mapResult;
         // fill the content from ashmem to the private mapping
         while (remaining > 0) {
