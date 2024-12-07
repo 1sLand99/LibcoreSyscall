@@ -13,6 +13,7 @@ load any in-memory ELF shared objects (lib*.so) without a writable path/mount po
 - No shared libraries (lib*.so) or assets files are shipped with the library
 - No `System.loadLibrary` or `System.load` is used
 - No temporary files are created on the disk (does not require a writable path/mount point)
+- No blocklisted hidden APIs are used
 - Small, no dependencies
 
 ## Usage
@@ -130,7 +131,7 @@ public String unameDemo() {
 - The `execmem` SELinux permission is required to allocate anonymous executable memory. Fortunately, this permission is granted to all app domain processes.
 - The `system_server` does not have the `execmem` permission. However, this is not true if you have a system-wide Xposed framework installed.
 
-## FAQ
+## FAQs
 
 - Q: How can I use this library in an Xposed in my project?  
   A: You can either download the prebuilt AAB artifact from the [Releases](https://github.com/cinit/LibcoreSyscall/releases) page,
@@ -159,7 +160,7 @@ public String unameDemo() {
 
 - Q: I have found that there are some code snippets for mips/mips64 architecture in the library. Can I use it on mips/mips64 devices?  
   A: No. These mips/mips64 code snippets are unfinished and untested.
-  I doubt whether there is any real-world mip/mips64 device that can run Android 5.0+.
+  I doubt whether there is any real-world mip/mips64 device running Android 5.0+.
   If you do really need to use this library on mips/mips64 devices, you can try to add the mips/mips64 architecture support by yourself.
 
 ## Build
