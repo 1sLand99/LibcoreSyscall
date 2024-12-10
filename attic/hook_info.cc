@@ -1,8 +1,8 @@
 #include "hook_info.h"
 
 EXPORT volatile HookInfo* get_hook_info() {
-    // place the hook info in the .text section, it will be filled before the shellcode is executed
-    __attribute__((aligned(16), section(".text")))
+    // place the hook info in the .rodata.hook_info section, it will be filled before the shellcode is executed
+    __attribute__((aligned(16), section(".rodata.hook_info")))
     static volatile HookInfo sHookInfo = {0xdeafbeef, {(int* (*)()) 0x114514}, {0x1000}};
     return &sHookInfo;
 }

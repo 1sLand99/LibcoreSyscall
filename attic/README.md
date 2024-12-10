@@ -89,7 +89,8 @@ Some compilers/linker specific flags are needed to compile the shellcode.
 - Visibility: `-fvisibility=hidden -fvisibility-inlines-hidden`
 - Make linker complain about missing symbols: `-Wl,--no-allow-shlib-undefined,--no-undefined`
 - Disable lazy binding: `-Wl,-z,defs,-z,now,-z,relro`
-- Remove unused sections: `-Wl,--gc-sections`
+- Specify the linker script: `-T,shellcode.ld`
+- Remove unused code: `-Wl,--gc-sections`
 
 An example command to compile the shellcode:
 
@@ -97,27 +98,34 @@ An example command to compile the shellcode:
 /path/to/clang++ -shared -fPIC -std=c++14 -O3 \
 -fvisibility=hidden -fvisibility-inlines-hidden -fno-omit-frame-pointer -Wall \
 -fno-rtti -fno-exceptions -nostdlib \
--Wl,-Bsymbolic,--no-allow-shlib-undefined,--no-undefined,-z,defs,-z,now,-z,relro,--gc-sections \
+-Wl,-Bsymbolic,--no-allow-shlib-undefined,--no-undefined,-z,defs,-z,now,-z,relro,--gc-sections,-T,shellcode.ld \
 -I/path/to/jni/include -I/path/to/linux-syscall-support \
 all_in_one.cc -o libcore_syscall.so
 ```
 
-The `file *.so` output may look like this:
+The `readelf --dynamic *.so` output may look like this:
 
 ```text
-shellcode-arm.so:     ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), static-pie linked, not stripped
-shellcode-arm64.so:   ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), static-pie linked, not stripped
-shellcode-mips.so:    ELF 32-bit LSB shared object, MIPS, MIPS32 version 1 (SYSV), static-pie linked, not stripped
-shellcode-mips64.so:  ELF 64-bit LSB shared object, MIPS, MIPS64 rel6 version 1 (SYSV), static-pie linked, not stripped
-shellcode-riscv64.so: ELF 64-bit LSB shared object, UCB RISC-V, RVC, double-float ABI, version 1 (SYSV), static-pie linked, not stripped
-shellcode-x86.so:     ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), static-pie linked, not stripped
-shellcode-x86_64.so:  ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), static-pie linked, not stripped
+Dynamic section at offset 0x1000 contains 9 entries:
+  Tag        Type                         Name/Value
+ 0x000000000000001e (FLAGS)              SYMBOLIC BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000006 (SYMTAB)             0x1090
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x1258
+ 0x000000000000000a (STRSZ)              444 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x14b8
+ 0x0000000000000004 (HASH)               0x1414
+ 0x0000000000000000 (NULL)               0x0
 ```
 
-Note that they should be `static-pie linked`, not `dynamically linked`.
+Note that there should be no `DT_NEEDED` entry in the dynamic section.
 
 Get the symbol table: `llvm-objdump -T libcore_syscall.so`
 
-Dump the text section: `llvm-objcopy -O binary --only-section=.text libcore_syscall.so shellcode.bin`
+If you are using your own linker script, make sure that the `.text` and `.rodata` sections are in the right place.
+
+Dump the .text and .rodata sections:
+`llvm-objcopy -O binary --only-section=.text --only-section=.rodata libcore_syscall.so shellcode.bin`
 
 That's all for the shellcode.
