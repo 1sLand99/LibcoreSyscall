@@ -7,3 +7,7 @@ EXPORT volatile HookInfo* get_hook_info() {
     return &sHookInfo;
 }
 
+__attribute__((noinline))
+EXPORT const void* get_current_pc() {
+    return __builtin_return_address(0);
+}

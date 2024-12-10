@@ -55,4 +55,23 @@ static inline uintptr_t align_down(uintptr_t ptr, size_t alignment) {
     return ((uintptr_t) ptr & ~(alignment - 1u));
 }
 
+#ifdef __cplusplus
+
+static inline void* align_up(void* ptr, size_t alignment) {
+    return reinterpret_cast<void*>(align_up(reinterpret_cast<uintptr_t>(ptr), alignment));
+}
+
+static inline void* align_down(void* ptr, size_t alignment) {
+    return reinterpret_cast<void*>(align_down(reinterpret_cast<uintptr_t>(ptr), alignment));
+}
+
+template<typename ResT>
+static inline void assert_syscall_success(ResT res) {
+    if (errno_of(res) != 0) [[unlikely]] {
+        __builtin_trap();
+    }
+}
+
+#endif
+
 #endif //LIBCORE_SHELLCODE_SYSCALL_EXT_H

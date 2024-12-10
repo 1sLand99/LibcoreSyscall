@@ -12,13 +12,6 @@
 #include "fake_fstat64.h"
 #include "clear_cache.h"
 
-template<typename ResT>
-static inline void assert_syscall_success(ResT res) {
-    if (errno_of(res) != 0) [[unlikely]] {
-        __builtin_trap();
-    }
-}
-
 EXPORT void* fake_mmap64(void* const addr, const size_t length, const int prot,
                          const int flags, const int fd, const uint64_t offset) {
     const auto* info = (HookInfo*) get_hook_info();

@@ -20,6 +20,7 @@
 #define ASHMEM_PURGE_ALL_CACHES _IO(__ASHMEMIOC, 10)
 #define ASHMEM_NAME_LEN 256
 
+__attribute__((noinline))
 EXPORT ssize_t ashmem_dev_get_size_region(int fd) {
     int NR_ioctl = __NR_ioctl;
     auto res = (ssize_t) syscall_ext(NR_ioctl, fd, ASHMEM_GET_SIZE, 0, 0, 0, 0);

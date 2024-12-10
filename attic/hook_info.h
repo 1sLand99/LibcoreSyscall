@@ -24,6 +24,8 @@ struct HookInfo {
 
 volatile HookInfo* get_hook_info();
 
+const void* get_current_pc();
+
 #ifdef __cplusplus
 }
 #endif
