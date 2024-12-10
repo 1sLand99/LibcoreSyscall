@@ -15,100 +15,83 @@ public class ShellcodeImpl_X86 extends BaseShellcode implements ISimpleInlineHoo
 
     @Override
     public byte[] getShellcodeBytes() {
-        //0000 g       .text  0000 ___text_dummy
-        //0000 g     F .text  0014 NativeBridge_breakpoint
-        //0020 g     F .text  0013 __clear_cache
-        //0040 g     F .text  007a syscall_ext
-        //00c0 g     F .text  0110 NativeBridge_nativeSyscall
-        //01d0 g     F .text  005c NativeBridge_nativeClearCache
-        //0230 g     F .text  0035 NativeBridge_nativeCallPointerFunction0
-        //0270 g     F .text  0044 NativeBridge_nativeCallPointerFunction1
-        //02c0 g     F .text  0052 NativeBridge_nativeCallPointerFunction2
-        //0320 g     F .text  0060 NativeBridge_nativeCallPointerFunction3
-        //0380 g     F .text  0074 NativeBridge_nativeCallPointerFunction4
-        //0400 g     F .text  007b NativeBridge_nativeGetJavaVM
-        //0480 g     F .text  001c get_hook_info
-        //04a0 g     F .text  006c ashmem_dev_get_size_region
-        //0510 g     F .text  0092 lsw_pread64
-        //05b0 g     F .text  006a lsw_mprotect
-        //0620 g     F .text  01b7 fake_fstat64
-        //07e0 g     F .text  04b5 fake_mmap64
-        //0d80  w    F .text  0155 memset
-        //0d00 g     F .text  0079 fake_mmap
-        //0ee0 l     O .text  0018 get_hook_info.sHookInfo
-        //0ca0 l     F .text  0027 align_up
-        //0cd0 l     F .text  0021 align_down
+        //0000 g    DF .text  000b NativeBridge_breakpoint
+        //0000 g    D  .text  0000 ___text_section
+        //0010 g    DF .text  003e NativeBridge_nativeSyscall
+        //0050 g    DF .text  0045 syscall_ext
+        //00a0 g    DF .text  000a NativeBridge_nativeClearCache
+        //00b0 g    DF .text  000a __clear_cache
+        //00c0 g    DF .text  0021 NativeBridge_nativeCallPointerFunction0
+        //00f0 g    DF .text  0027 NativeBridge_nativeCallPointerFunction1
+        //0120 g    DF .text  002d NativeBridge_nativeCallPointerFunction2
+        //0150 g    DF .text  0030 NativeBridge_nativeCallPointerFunction3
+        //0180 g    DF .text  0030 NativeBridge_nativeCallPointerFunction4
+        //01b0 g    DF .text  004a NativeBridge_nativeGetJavaVM
+        //0200 g    DF .text  0043 ashmem_dev_get_size_region
+        //0250 g    DF .text  001c get_hook_info
+        //0270 g    DF .text  000d get_current_pc
+        //0280 g    DF .text  00a4 fake_fstat64
+        //0330 g    DF .text  040d fake_mmap64
+        //0860 g    DF .text  003f fake_mmap
+        //0c20 l     O .rodata  0018 _ZZ13get_hook_infoE9sHookInfo
         String b64 =
-                "VYnlg+T8g+wIi0UMi0UIzInsXcOQkJCQkJCQkJCQkJBVieWD5PyD7AiLRQyLRQiJ7F3DkJCQkJCQ\n" +
-                        "kJCQkJCQkFWJ5VdWg+T8g+wgi0Ugi0Uci0UYi0UUi0UQi0UMi0UIi0UIiUQkHItEJByJRCQYi0UM\n" +
-                        "iUQkCItFIIlEJAyLRCQYiUQkEI1EJAiLTRCLVRSLdRiLfRxVU4toBIsYi0AIzYBbXYlEJBSLRCQU\n" +
-                        "iUQkBItEJASNZfheX13DkJCQkJCQVYnlU1dWg+TwgeyAAAAA6AAAAABbgcNsHgAAi0U8iUQkOItN\n" +
-                        "QItVNIt1OIt9LItFMIlEJDSLRSSJRCQwi0UoiUQkLItFHIlEJCiLRSCJRCQki0UUiUQkHItFGIlE\n" +
-                        "JCCLRRCLRQyLRQiLRCQciUQkcItEJCCJRCR0i0QkJIlEJGyLRCQoiUQkaItEJCyJRCRki0QkMIlE\n" +
-                        "JGCLRCQ0iUQkXItEJDiJfCRYiXQkVIlUJFCJTCRMiUQkSItFEIlEJESLVCRwi3QkaIt8JGCLRCRY\n" +
-                        "iUQkQItEJFCJRCQ8i0wkSIngiUgYi0wkPIlIFItMJECJSBCLTCREiXgMiXAIiVAEiQjoev7//zHS\n" +
-                        "jWX0Xl9bXcNVieVTg+Twg+wg6AAAAABbgcNhHQAAi0UYi0Uci0UQi0UUi0UMi0UIi0UQiUQkEItF\n" +
-                        "GIlEJAyLRCQQA0QkDIlEJAiLTCQQi0QkCIkMJIlEJATo+v3//41l/Ftdw5CQkJBVieVTg+Twg+wQ\n" +
-                        "6AAAAABbgcMBHQAAi0UQi0UUi0UMi0UIi0UQiQQkiwQk/9Ax0o1l/Ftdw5CQkJCQkJCQkJCQVYnl\n" +
-                        "U4Pk8IPsIOgAAAAAW4HDwRwAAItFGItFHItFEItFFItFDItFCItFEIlEJBCLRCQQi1UYieGJEf/Q\n" +
-                        "MdKNZfxbXcOQkJCQkJCQkJCQkJBVieVTVoPk8IPsEOgAAAAAW4HDcBwAAItFIItFJItFGItFHItF\n" +
-                        "EItFFItFDItFCItFEIlEJAyLRCQMi1UYi3UgieGJcQSJEf/QMdKNZfheW13DkJCQkJCQkJCQkJCQ\n" +
-                        "kJBVieVTV1aD5PCD7CDoAAAAAFuBww8cAACLRSiLRSyLRSCLRSSLRRiLRRyLRRCLRRSLRQyLRQiL\n" +
-                        "RRCJRCQYi0QkGItVGIt1IIt9KInhiXkIiXEEiRH/0DHSjWX0Xl9bXcNVieVTV1aD5PCD7CDoAAAA\n" +
-                        "AFuBw68bAACLRTCLRTSLRSiLRSyLRSCLRSSLRRiLRRyLRRCLRRSLRQyLRQiLRRCJRCQYi0QkGIlE\n" +
-                        "JBSLVRiLdSCLfSiLRTCJ4YlBDItEJBSJeQiJcQSJEf/QMdKNZfReX1tdw5CQkJCQkJCQkJCQkFWJ\n" +
-                        "5VOD5PCD7CDoAAAAAFuBwzEbAACLRQyLRQjHRCQIAAAAAItFCIsAi4BsAwAAi1UIjUwkCIkUJIlM\n" +
-                        "JAT/0IP4AA+FFQAAAItEJAiJRCQMx0QkEAAAAADpEAAAAMdEJBAAAAAAx0QkDAAAAACLRCQMi1Qk\n" +
-                        "EI1l/Ftdw5CQkJCQVYnlg+T86AAAAABYgcC1GgAAjYCg7///iexdw5CQkJBVieVTg+Twg+ww6AAA\n" +
-                        "AABbgcORGgAAi0UIx0QkIDYAAACLTCQgi0UIMdKJDCSJRCQEx0QkCAR3AADHRCQMAAAAAMdEJBAA\n" +
-                        "AAAAx0QkFAAAAADHRCQYAAAAAOhC+///iUQkHItEJByNZfxbXcOQkJCQVYnlU1dWg+Twg+xA6AAA\n" +
-                        "AABbgcMfGgAAi00Ui0UYi1UQi1UMi1UIiUwkMIlEJDTHRCQstAAAAItEJDSJRCQoi0QkMIlEJCSL\n" +
-                        "fQiLdQyLVRCLTCQki0QkKIlEJCAxwItEJCDHBCS0AAAAiXwkBIl0JAiJVCQMiUwkEIlEJBTHRCQY\n" +
-                        "AAAAAOim+v//jWX0Xl9bXcOQkJCQkJCQkJCQkJCQkFWJ5VNWg+Twg+wg6AAAAABbgcOAGQAAi0UQ\n" +
-                        "i0UMi0UIx0QkHH0AAACLVQiLTQyLRRAx9scEJH0AAACJVCQEiUwkCIlEJAzHRCQQAAAAAMdEJBQA\n" +
-                        "AAAAx0QkGAAAAADoLfr//41l+F5bXcOQkJCQkJBVieVTVoPk8IPsYOgAAAAAW4HDEBkAAIlcJCyL\n" +
-                        "RQyLRQjoOv7//4tcJCyJRCRIi0UMiUQkRMdEJEDFAAAAi00Ii0QkRDHSxwQkxQAAAIlMJASJRCQI\n" +
-                        "x0QkDAAAAADHRCQQAAAAAMdEJBQAAAAAx0QkGAAAAADopvn//4lEJDyLRCQ8iUQkXItEJFyJRCRY\n" +
-                        "McCDfCRYAIhEJDMPjQ8AAACBfCRYAfD//w+dwIhEJDOKRCQzJAEPtsCD+AAPhCgAAACLXCQsi0Qk\n" +
-                        "SP9QCIlEJDgxyStMJDyLRCQ4iQjHRCRM/////+nEAAAAi0wkRIsBi0kEi3QkSIsWi3YEMfEx0AnI\n" +
-                        "D4WeAAAA6QAAAACLTCRIiwGLSQQJyA+EiAAAAOkAAAAAi0wkRItBLItJMAnID4VxAAAA6QAAAACL\n" +
-                        "XCQsi0UIiQQk6Dn9//+JRCQ0i0QkNIlEJFSLRCRUiUQkUDHAg3wkUACIRCQrD40PAAAAgXwkUAHw\n" +
-                        "//8PncCIRCQrikQkKyQBD7bAg/gAD4USAAAAi0wkNItEJESJSCzHQDAAAAAA6QAAAADHRCRMAAAA\n" +
-                        "AItEJEyNZfheW13DkJCQkJCQkJCQVYnlU1dWg+TwgewAAQAA6AAAAABbgcNMFwAAiVwkOItNHItF\n" +
-                        "IItVGItVFItVEItVDItVCImMJOgAAACJhCTsAAAA6Fn8//+JhCTkAAAAx4Qk4AAAAP/////HhCTc\n" +
-                        "AAAAAAAAAMeEJNgAAAAAAAAAx4Qk1AAAAAAAAADHhCTQAAAAAAAAAItFEImEJMwAAACDfRgAD4zi\n" +
-                        "AAAAi0UUg+ACg/gAD4TTAAAAi0UUg+Agg/gAD4XEAAAAi1wkOI1EJGwxyYkEJMdEJAQAAAAAx0Qk\n" +
-                        "CGAAAADoxwQAAItcJDiLTRiNRCRsiQwkiUQkBOhQ/f//g/gAD4V9AAAAi0QkbItMJHCLtCTkAAAA\n" +
-                        "ixaLdgQx8THQCcgPhVgAAADpAAAAAIuMJOQAAACLAYtJBAnID4Q/AAAA6QAAAACLRRiJhCTgAAAA\n" +
-                        "8g8QhCToAAAA8g8RhCTYAAAAi0UMiYQk0AAAAMeEJNQAAAAAAAAAi0UQg8gDiUUQ6QAAAADpAAAA\n" +
-                        "AItcJDiLhCTkAAAAi0AI/9CJRCRoD7eEJOgAAACp/w8AAA+EIAAAAOkAAAAAi0QkaMcAFgAAALj/\n" +
-                        "////iYQk8AAAAOnkAgAAi4Qk7AAAAKkA8P//D4QgAAAA6QAAAACLRCRoxwAWAAAAuP////+JhCTw\n" +
-                        "AAAA6bICAACLXQiLfQyLdRCLVRSLRRiJRCQwi4wk6AAAAIuEJOwAAAAPpMgUi0wkMMcEJMAAAACJ\n" +
-                        "XCQEi1wkOIl8JAiJdCQMiVQkEIlMJBSJRCQY6Bv2//+JRCRki0QkZImEJPgAAACLhCT4AAAAiYQk\n" +
-                        "9AAAADHAg7wk9AAAAACIRCQ3D40SAAAAgbwk9AAAAAHw//8PncCIRCQ3ikQkNyQBD7bAg/gAD4Qd\n" +
-                        "AAAAMckrTCRki0QkaIkIuP////+JhCTwAAAA6e8BAACDvCTgAAAA/w+E0QEAAPIPEIQk2AAAAPIP\n" +
-                        "EUQkWPIPEIQk0AAAAPIPEUQkUItEJGSJRCRMi0QkUItMJFQJyA+E3gAAAOkAAAAAi0wkUItEJFSB\n" +
-                        "6QEQAACD2AAPghMAAADpAAAAALgAEAAAiUQkLOkIAAAAi0QkUIlEJCyLRCQsiUQkSIuMJOAAAACL\n" +
-                        "VCRMi3QkSIt8JFiLXCRcieCJWBCLXCQ4iXgMiXAIiVAEiQjoxvn//4lEJESDfCREAA+PFQAAAIN8\n" +
-                        "JET8D4UFAAAA6WL////pSwAAAIt0JESJ8sH6H4tMJFCLRCRUKfEZ0IlMJFCJRCRUi3QkRInywfof\n" +
-                        "i0wkWItEJFwB8RHQiUwkWIlEJFyLRCRMA0QkRIlEJEzpEv///4tcJDiLRCRkiUQkKItNDIuEJOQA\n" +
-                        "AACLQBCJDCSJRCQE6MIAAACLXCQ4i1QkKInBi4QkzAAAAIkUJIlMJASJRCQI6LH5//+LhCTMAAAA\n" +
-                        "g+AEg/gAD4RfAAAAi1wkOItMJGSLhCTkAAAAi0AQiQwkiUQkBOigAAAAi1wkOIlEJECLTCRkA00M\n" +
-                        "i4Qk5AAAAItAEIkMJIlEJAToSwAAAItcJDiJRCQ8i0wkQItEJDyJDCSJRCQE6K/z///pAAAAAOkA\n" +
-                        "AAAAi0QkZImEJPAAAACLhCTwAAAAjWX0Xl9bXcOQkJCQkJCQkJCQkFWJ5YPk/IPsCItFDItFCItF\n" +
-                        "CANFDIPoAYtNDIPpAYPx/yHIiexdw5CQkJCQkJCQkFWJ5YPk/IPsCItFDItFCItFCItNDIPpAYPx\n" +
-                        "/yHIiexdw5CQkJCQkJCQkJCQkJCQkFWJ5VNXVoPk8IPsMOgAAAAAW4HDLxIAAItFHItFGItFFItF\n" +
-                        "EItFDItFCItFCIlEJCiLVQyLdRCLfRSLRRiJRCQki0UciUQkIDHJieCJSBiLTCQgiUgUi0wkJIlI\n" +
-                        "EItMJCiJeAyJcAiJUASJCOhv+v//jWX0Xl9bXcOQkJCQkJCQVYnlg+T8g+wYi0UQi0UMi0UIi0UI\n" +
-                        "iUQkEIN9EAAPhQwAAACLRQiJRCQU6R4BAACLRQyIwYtEJBCICItFDIjCi0QkEItNEIPpAYgUCIN9\n" +
-                        "EAIPhwwAAACLRQiJRCQU6esAAACLRQyIwYtEJBCISAGLRQyIwYtEJBCISAKLRQyIwotEJBCLTRCD\n" +
-                        "6QKIFAiLRQyIwotEJBCLTRCD6QOIFAiDfRAGD4cMAAAAi0UIiUQkFOmZAAAAi0UMiMGLRCQQiEgD\n" +
-                        "i0UMiMKLRCQQi00Qg+kEiBQIg30QCA+HDAAAAItFCIlEJBTpZQAAAItMJBAxwCnIg+ADiUQkDItE\n" +
-                        "JAwDRCQQiUQkEItMJAyLRRApyIlFEItFEIPg/IlFEIN9EAAPhCQAAACLRQyIwYtEJBCICItFEIPA\n" +
-                        "/4lFEItEJBCDwAGJRCQQ6dL///+LRQiJRCQUi0QkFInsXcPMzMzMzMzMzMzMzO++r94AAAAAFEUR\n" +
-                        "AAAAAAAAEAAAAAAAAA==";
+                "VYnlg+T8zInsXcOQkJCQkFWJ5VOD5PCD7BDoAAAAAFuBwynw//+D7AT/dTz/dTT/dSz/dST/dRz/\n" +
+                        "dRT/dRDoDQAAAIPEIDHSjWX8W13DkJBVieVXVoPk/IPsEItNEItVFIt1GIt9HItFDIlEJASLRSCJ\n" +
+                        "RCQIi0UIiUQkDI1EJARVU4toBIsYi0AIzYBbXY1l+F5fXcOQkJCQkJCQkJCQkFWJ5YPk/InsXcOQ\n" +
+                        "kJCQkJBVieWD5PyJ7F3DkJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HDee////9VEDHSjWX8W13DkJCQ\n" +
+                        "kJCQkJCQkJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HDSe///4tFGIkEJP9VEDHSjWX8W13DkJCQkJCQ\n" +
+                        "kJCQVYnlU4Pk8IPsEOgAAAAAW4HDGe///4PsCP91IP91GP9VEIPEEDHSjWX8W13DkJCQVYnlU4Pk\n" +
+                        "8IPsEOgAAAAAW4HD6e7//4PsBP91KP91IP91GP9VEIPEEDHSjWX8W13DVYnlU4Pk8IPsEOgAAAAA\n" +
+                        "W4HDue7///91MP91KP91IP91GP9VEIPEEDHSjWX8W13DVYnlU4Pk8IPsEOgAAAAAW4HDie7//4tF\n" +
+                        "CMcEJAAAAACLCIPsCI1UJAhSUP+RbAMAAIPEEInBuAAAAACFyXUDiwQkMdKNZfxbXcOQkJCQkJBV\n" +
+                        "ieVTg+Twg+ww6AAAAABbgcM57v//i0UIDyiDyBsAAA8RRCQIiUQkBMdEJBgAAAAAxwQkNgAAAOgT\n" +
+                        "/v//jWX8W13DkJCQkJCQkJCQkJCQkFWJ5YPk/OgAAAAAWIHA7e3//42A2BsAAInsXcOQkJCQVYnl\n" +
+                        "g+T8i0UEiexdw5CQkFWJ5VNXVoPk8IPsIOgAAAAAW4HDt+3//4t9DItFCA9XwA8RRCQMiXwkCIlE\n" +
+                        "JATHBCTFAAAA6Jb9//89AfD//3ITicb/k+AbAAD33okwuP/////rSIuL2BsAAIuT3BsAAIt3BDHW\n" +
+                        "iz8xzzHACfd1LQnRdCmLdQyLTiwLTjB1HotFCIkEJOj3/v//PQDw//93ColGLMdGMAAAAAAxwI1l\n" +
+                        "9F5fW13DkJCQkJCQkJCQkJCQVYnlU1dWg+TwgezgAAAA6AAAAABbgcME7f//i30ci0UUsgExyYN9\n" +
+                        "GAAPiGIBAACD4CKD+AIPhVYBAAAPV8APKUQkcA8pRCRgDylEJFAPKUQkQA8pRCQwDylEJCCD7CAP\n" +
+                        "EUQkDI1EJECJRCQIi0UYiUQkBMcEJMUAAADoofz//4PEID0A8P//dhWJxv+T4BsAAPfeiTCwATHJ\n" +
+                        "6e0AAACLg9gbAACLi9wbAACLVCQkMcqLdCQgMcYJ1nUvCch0K4tEJEwLRCRQdSGD7Az/dRjo/f3/\n" +
+                        "/4PEED0A8P//dwyJRCRMx0QkUAAAAACLg9gbAACLi9wbAACLVCQkMcqLdCQgMcYJ1g+UwgnID5XA\n" +
+                        "INCJxrABi00Q9sEEdHAPV8APKYQkwAAAAA8phCSwAAAADymEJKAAAAAPKYQkkAAAAA8phCSAAAAA\n" +
+                        "x4Qk0AAAAAAAAACD7CAPEUQkDI2EJKAAAACJRCQIi0UYiUQkBMcEJA0BAADoq/v//4PEILmUGQIB\n" +
+                        "M4wkgAAAAAnBD5XAifGJyvbSIMKIVCQMic7/k+AbAAD3x/8PAAB0EMcAFgAAALj/////6ekBAACJ\n" +
+                        "RCQIi00gi1UMuLX////3wQDw//91NYnwAMAPtsALRRAPpPkUg+wEUf91GP91FFBS/3UIaMAAAADo\n" +
+                        "Lfv//4PEID0B8P//D4K4AAAAiVwkEDHJg/jzD5XBiUwkFDHbi00U9sECD5TDic7B7gWD5gExyYtV\n" +
+                        "EPbCBA+UwQ+2fCQMCd8J8QnPC3wkFHQS99iLTCQIiQG4/////+lMAQAAi1UU9sICD5TB90UgAPD/\n" +
+                        "/4tcJBCLfRx1OgpMJAx1NItNEIPh+4tFIA+k+BSD7ARQ/3UYUlH/dQz/dQhowAAAAOiJ+v//g8Qg\n" +
+                        "PQDw//8PhgEBAACLRCQIxwANAAAAuP/////p5QAAAInxhMmLTSAPhNgAAACJfCQciUQkGIN9DAAP\n" +
+                        "hJgAAACJzzHSi0QkGIlEJBCLTQzrLZCQkJCQkJCLTCQMKcGLVCQIg9oAAceJfCQci3wkFIPXAAHG\n" +
+                        "iXQkEInICdB0Wol8JBSJVCQIiUwkDIH5ABAAALgAEAAAD0LBhdK+ABAAAA9FxoPsBGoAV4t8JChX\n" +
+                        "UIt0JCRW/3UYaLQAAADoyPn//4PEIIXAf5GD+PyLfCQUi1QkCItMJAx0oIuD6BsAAItNDAHBSffY\n" +
+                        "IciD7ARqAGoAagD/dRBQi3QkMFZqfeiH+f//ifCDxCCNZfReX1tdw4PsIA9XwA8RRCQMi3UMiXQk\n" +
+                        "CIlEJATHBCRbAAAA6Fj5//+DxCA9AfD//3M5i0UQg8gCi00Ug8kgg+wEagBq/1FQVv91CGjAAAAA\n" +
+                        "6Cv5//+DxCA9AfD//4tNIA+DOv7//+m7/v//DwuQkJBVieVTg+Twg+ww6AAAAABbgcP56P//i0UI\n" +
+                        "i00MD1fADxFEJAyJTCQIiUQkBMcEJA0BAADo2Pj//41l/Ftdw5CQVYnlU4Pk8IPsEOgAAAAAW4HD\n" +
+                        "uej//4tNILi1////98EA8P//dSeLRRwPpMEUg+wEUf91GP91FP91EP91DP91CGjAAAAA6Ib4//+D\n" +
+                        "xCCNZfxbXcOQkJCQkJCQkJCQkJCQVYnlU4Pk8IPsMOgAAAAAW4HDWej//w8oRQiLRRiJRCQUDxFE\n" +
+                        "JATHRCQYAAAAAMcEJLQAAADoNvj//41l/Ftdw1WJ5VOD5PCD7BDoAAAAAFuBwxno//+D7ARqAGoA\n" +
+                        "agD/dRD/dQz/dQhqfegB+P//g8QgjWX8W13DkJCQkJCQkJBVieVTg+Twg+ww6AAAAABbgcPZ5///\n" +
+                        "DyhFCItFGItNHIlMJBSJRCQQDxEEJMdEJBgAAAAA6Jf6//+NZfxbXcOQVYnlU4Pk8IPsMOgAAAAA\n" +
+                        "W4HDmef//4tFCItNDA9XwA8RRCQMiUwkCIlEJATHBCRbAAAA6Hj3//+NZfxbXcOQkFWJ5VOD5PCD\n" +
+                        "7BDoAAAAAFuBw1nn//+D7ARqAGoAagD/dRD/dQz/dQhqA+hB9///g8QgjWX8W13DkJCQkJCQkJBV\n" +
+                        "ieVTg+Twg+wQ6AAAAABbgcMZ5///g+wEagBqAGoA/3UQ/3UM/3UIagToAff//4PEII1l/Ftdw5CQ\n" +
+                        "kJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HD2eb//w+3RRSD7ARqAGoAUP91EP91DP91CGgnAQAA6Lv2\n" +
+                        "//+DxCCNZfxbXcOQkFWJ5VOD5PCD7DDoAAAAAFuBw5nm//8PKEUIDxFEJATHRCQYAAAAAMdEJBQA\n" +
+                        "AAAAxwQkLAEAAOh19v//jWX8W13DkJCQkJCQkJCQkJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HDSeb/\n" +
+                        "/4PsBGoAagBqAP91DP91CGqcaCwBAADoL/b//4PEII1l/Ftdw5CQkJCQkFWJ5VOD5PCD7DDoAAAA\n" +
+                        "AFuBwwnm//+LRQiLTQwPV8APEUQkDIlMJAiJRCQExwQkxQAAAOjo9f//jWX8W13DkJBVieVTg+Tw\n" +
+                        "g+ww6AAAAABbgcPJ5f//i0UID1fADxFEJAiJRCQEx0QkGAAAAADHBCQGAAAA6Kf1//+NZfxbXcOQ\n" +
+                        "VYnlU4Pk8IPsEOgAAAAAW4HDieX//4PsBGoAagBqAP91EP91DP91CGo26HH1//+DxCCNZfxbXcOQ\n" +
+                        "kJCQkJCQkFWJ5VOD5PCD7DDoAAAAAFuBw0nl//+LRQgPV8APEUQkCIlEJATHRCQYAAAAAMcEJPwA\n" +
+                        "AADoJ/X//5CQkJCQkJBVieWD5PwPC5CQkJCQkJCQVYnlU1dWg+T8i00Qi0UIhckPhK0AAACLXQyI\n" +
+                        "GIhcCP+D+QMPgpsAAACIWAGIWAKIXAj+iFwI/YP5Bw+ChAAAAIhYA4hcCPyD+QlyeInH99+D5wON\n" +
+                        "FDgp+YPh/A+282n2AQEBAYk0OIl0EfyD+QlyVIlyBIlyCIl0CvSJdAr4g/kZckFmD27GZg9wwADz\n" +
+                        "D39CDPMPf0QK5InWg+YEg84YKfGD+SByHgHykJCQkJCQkJDzD38C8w9/QhCDweCDwiCD+R937I1l\n" +
+                        "9F5fW13DAAAAAAR3AAAAAAAAAAAAAAAAAADvvq/eAAAAABRFEQAAAAAAABAAAAAAAAA=\n";
         byte[] bytes = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
-        int hookInfoOffset = 0x0ee0;
+        int hookInfoOffset = 0x0c20;
         fillInHookInfo(bytes, hookInfoOffset);
         return bytes;
     }
@@ -120,57 +103,57 @@ public class ShellcodeImpl_X86 extends BaseShellcode implements ISimpleInlineHoo
 
     @Override
     public int getNativeClearCacheOffset() {
-        return 0x01d0;
+        return 0x00a0;
     }
 
     @Override
     public int getNativeSyscallOffset() {
-        return 0x00c0;
+        return 0x0010;
     }
 
     @Override
     public int getNativeCallPointerFunction0Offset() {
-        return 0x0230;
+        return 0x00c0;
     }
 
     @Override
     public int getNativeCallPointerFunction1Offset() {
-        return 0x0270;
+        return 0x00f0;
     }
 
     @Override
     public int getNativeCallPointerFunction2Offset() {
-        return 0x02c0;
+        return 0x0120;
     }
 
     @Override
     public int getNativeCallPointerFunction3Offset() {
-        return 0x0320;
+        return 0x0150;
     }
 
     @Override
     public int getNativeCallPointerFunction4Offset() {
-        return 0x0380;
+        return 0x0180;
     }
 
     @Override
     public int getNativeGetJavaVmOffset() {
-        return 0x0400;
+        return 0x01b0;
     }
 
     @Override
     public int getFakeStat64Offset() {
-        return 0x0620;
+        return 0x0280;
     }
 
     @Override
     public int getFakeMmap64Offset() {
-        return 0x07e0;
+        return 0x0330;
     }
 
     @Override
     public int getFakeMmapOffset() {
-        return 0x0d00;
+        return 0x0860;
     }
 
     @Override
