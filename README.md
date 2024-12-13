@@ -10,20 +10,24 @@ load any in-memory ELF shared objects (lib*.so) without a writable path/mount po
 - Support loading in-memory ELF shared objects (lib*.so) without a file
 - Support arm/arm64/x86/x86_64/riscv64 architectures
 - Implemented in 100% pure Java 1.8
-- No shared libraries (lib*.so) or assets files are shipped with the library
+- No shared libraries (lib*.so) or assets files are shipped with the library (whole library as a single dex file version 035)
 - No `System.loadLibrary` or `System.load` is used
 - No temporary files are created on the disk (does not require a writable path/mount point)
 - No blocklisted hidden APIs are used
-- Small, no dependencies
+- Small, no dependencies (less than 100 KiB)
 
 ## Usage
 
 The library provides the following classes:
 
-- MemoryAccess/MemoryAllocator: Allocate and read/write native memory.
-- NativeAccess: Register JNI methods, or call native functions (such as `dlopen`, `dlsym`, etc.) directly.
-- Syscall: Make any Linux system calls.
-- DlExtLibraryLoader: Load any ELF shared objects (lib*.so) directly from memory.
+- [MemoryAccess](core-syscall/src/main/java/dev/tmpfs/libcoresyscall/core/MemoryAccess.java) /
+  [MemoryAllocator](core-syscall/src/main/java/dev/tmpfs/libcoresyscall/core/MemoryAllocator.java):
+  Allocate and read/write native memory.
+- [NativeAccess](core-syscall/src/main/java/dev/tmpfs/libcoresyscall/core/NativeAccess.java):
+  Register JNI methods, or call native functions (such as `dlopen`, `dlsym`, etc.) directly.
+- [Syscall](core-syscall/src/main/java/dev/tmpfs/libcoresyscall/core/Syscall.java): Make any Linux system calls.
+- [DlExtLibraryLoader](core-syscall/src/main/java/dev/tmpfs/libcoresyscall/elfloader/DlExtLibraryLoader.java):
+  Load any ELF shared objects (lib*.so) directly from memory.
 
 ## Examples
 
@@ -163,6 +167,8 @@ public String unameDemo() {
   I doubt whether there is any real-world mip/mips64 device running Android 5.0+.
   If you do really need to use this library on mips/mips64 devices, you can try to add the mips/mips64 architecture support by yourself.
 
+- If you have any other questions, please feel free to open an issue.
+
 ## Build
 
 To build the library:
@@ -179,7 +185,9 @@ To build the demo app:
 
 ## Credits
 
-- [pine](https://github.com/canyie/pine)
+- [pine](https://github.com/canyie/pine): A dynamic Java method hook framework for ART.
+- [linux-syscall-support](https://chromium.googlesource.com/linux-syscall-support): Linux syscall wrappers and kernel_* structures.
+- [musl](https://musl.libc.org/): The musl C library.
 
 ## License
 
