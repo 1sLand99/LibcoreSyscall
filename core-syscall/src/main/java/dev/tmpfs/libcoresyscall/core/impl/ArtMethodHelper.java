@@ -15,6 +15,7 @@ import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dev.tmpfs.libcoresyscall.core.NativeAccess;
 import dev.tmpfs.libcoresyscall.core.NativeHelper;
 import libcore.io.Memory;
 import sun.misc.Unsafe;
@@ -142,6 +143,9 @@ public class ArtMethodHelper {
         return sArtMethodNativeEntryPointOffset;
     }
 
+    /**
+     * See documentation at {@link NativeAccess#registerNativeMethod(Member, long)}.
+     */
     public static void registerNativeMethod(@NonNull Member method, long address) {
         if (!(method instanceof Method) && !(method instanceof Constructor)) {
             throw new IllegalArgumentException("method must be a method or constructor");
@@ -298,12 +302,18 @@ public class ArtMethodHelper {
         return sArtJniDlsymLookupCriticalStub;
     }
 
+    /**
+     * See documentation at {@link NativeAccess#registerNativeMethod(Member, long)}.
+     */
     public static void unregisterNativeMethod(@NonNull Member method) {
         // FIXME: 2024-11-30 critical native method should be set to
         //  art_jni_dlsym_lookup_critical_stub instead of art_jni_dlsym_lookup_stub
         registerNativeMethod(method, getJniDlsymLookupStub());
     }
 
+    /**
+     * See documentation at {@link NativeAccess#getRegisteredNativeMethod(Member)}.
+     */
     public static long getRegisteredNativeMethod(@NonNull Member method) {
         if (!(method instanceof Method) && !(method instanceof Constructor)) {
             throw new IllegalArgumentException("method must be a method or constructor: " + method);
