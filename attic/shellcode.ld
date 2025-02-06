@@ -41,6 +41,10 @@ SECTIONS {
         *(.eh_frame)
     } > ramnone : phdr
 
+    .eh_frame_hdr : {
+        *(.eh_frame_hdr)
+    } > ramnone : phdr
+
     .text : {
         . = ALIGN(4096);
         PROVIDE( __text_start = . );
@@ -49,7 +53,11 @@ SECTIONS {
     } > ramrx : text
 
     .rodata : {
-        *(.rodata .rodata.*)
+        *(.rodata .rodata.*) *(.got.plt)
+    } > ramrx : text
+
+    .ARM.exidx : {
+        *(.ARM.exidx)
     } > ramrx : text
 
     .data : {
