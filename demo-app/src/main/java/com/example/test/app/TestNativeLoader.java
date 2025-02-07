@@ -53,7 +53,7 @@ public class TestNativeLoader {
         }
     }
 
-    private static byte[] getElfData(String soname) {
+    public static byte[] getElfData(String soname) {
         String path = "/lib/" + getNativeLibraryDirName(NativeHelper.getCurrentRuntimeIsa()) + "/" + soname;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (InputStream is = TestNativeLoader.class.getResourceAsStream(path)) {
