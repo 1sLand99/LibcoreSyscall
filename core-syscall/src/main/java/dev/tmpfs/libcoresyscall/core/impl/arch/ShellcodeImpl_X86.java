@@ -30,68 +30,69 @@ public class ShellcodeImpl_X86 extends BaseShellcode implements ISimpleInlineHoo
         //0200 g    DF .text  0043 ashmem_dev_get_size_region
         //0250 g    DF .text  001c get_hook_info
         //0270 g    DF .text  000d get_current_pc
-        //0280 g    DF .text  00a4 fake_fstat64
-        //0330 g    DF .text  040d fake_mmap64
-        //0860 g    DF .text  003f fake_mmap
-        //0c20 l     O .rodata  0018 _ZZ13get_hook_infoE9sHookInfo
+        //0280 g    DF .text  00b2 fake_fstat64
+        //0340 g    DF .text  041d fake_mmap64
+        //0880 g    DF .text  003f fake_mmap
+        //0c40 l     O .rodata  0018 _ZZ13get_hook_infoE9sHookInfo
         String b64 =
-                "VYnlg+T8zInsXcOQkJCQkFWJ5VOD5PCD7BDoAAAAAFuBwynw//+D7AT/dTz/dTT/dSz/dST/dRz/\n" +
+                "VYnlg+T8zInsXcOQkJCQkFWJ5VOD5PCD7BDoAAAAAFuBwzkMAACD7AT/dTz/dTT/dSz/dST/dRz/\n" +
                         "dRT/dRDoDQAAAIPEIDHSjWX8W13DkJBVieVXVoPk/IPsEItNEItVFIt1GIt9HItFDIlEJASLRSCJ\n" +
                         "RCQIi0UIiUQkDI1EJARVU4toBIsYi0AIzYBbXY1l+F5fXcOQkJCQkJCQkJCQkFWJ5YPk/InsXcOQ\n" +
-                        "kJCQkJBVieWD5PyJ7F3DkJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HDee////9VEDHSjWX8W13DkJCQ\n" +
-                        "kJCQkJCQkJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HDSe///4tFGIkEJP9VEDHSjWX8W13DkJCQkJCQ\n" +
-                        "kJCQVYnlU4Pk8IPsEOgAAAAAW4HDGe///4PsCP91IP91GP9VEIPEEDHSjWX8W13DkJCQVYnlU4Pk\n" +
-                        "8IPsEOgAAAAAW4HD6e7//4PsBP91KP91IP91GP9VEIPEEDHSjWX8W13DVYnlU4Pk8IPsEOgAAAAA\n" +
-                        "W4HDue7///91MP91KP91IP91GP9VEIPEEDHSjWX8W13DVYnlU4Pk8IPsEOgAAAAAW4HDie7//4tF\n" +
+                        "kJCQkJBVieWD5PyJ7F3DkJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HDiQsAAP9VEDHSjWX8W13DkJCQ\n" +
+                        "kJCQkJCQkJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HDWQsAAItFGIkEJP9VEDHSjWX8W13DkJCQkJCQ\n" +
+                        "kJCQVYnlU4Pk8IPsEOgAAAAAW4HDKQsAAIPsCP91IP91GP9VEIPEEDHSjWX8W13DkJCQVYnlU4Pk\n" +
+                        "8IPsEOgAAAAAW4HD+QoAAIPsBP91KP91IP91GP9VEIPEEDHSjWX8W13DVYnlU4Pk8IPsEOgAAAAA\n" +
+                        "W4HDyQoAAP91MP91KP91IP91GP9VEIPEEDHSjWX8W13DVYnlU4Pk8IPsEOgAAAAAW4HDmQoAAItF\n" +
                         "CMcEJAAAAACLCIPsCI1UJAhSUP+RbAMAAIPEEInBuAAAAACFyXUDiwQkMdKNZfxbXcOQkJCQkJBV\n" +
-                        "ieVTg+Twg+ww6AAAAABbgcM57v//i0UIDyiDyBsAAA8RRCQIiUQkBMdEJBgAAAAAxwQkNgAAAOgT\n" +
-                        "/v//jWX8W13DkJCQkJCQkJCQkJCQkFWJ5YPk/OgAAAAAWIHA7e3//42A2BsAAInsXcOQkJCQVYnl\n" +
-                        "g+T8i0UEiexdw5CQkFWJ5VNXVoPk8IPsIOgAAAAAW4HDt+3//4t9DItFCA9XwA8RRCQMiXwkCIlE\n" +
-                        "JATHBCTFAAAA6Jb9//89AfD//3ITicb/k+AbAAD33okwuP/////rSIuL2BsAAIuT3BsAAIt3BDHW\n" +
-                        "iz8xzzHACfd1LQnRdCmLdQyLTiwLTjB1HotFCIkEJOj3/v//PQDw//93ColGLMdGMAAAAAAxwI1l\n" +
-                        "9F5fW13DkJCQkJCQkJCQkJCQVYnlU1dWg+TwgezgAAAA6AAAAABbgcME7f//i30ci0UUsgExyYN9\n" +
-                        "GAAPiGIBAACD4CKD+AIPhVYBAAAPV8APKUQkcA8pRCRgDylEJFAPKUQkQA8pRCQwDylEJCCD7CAP\n" +
-                        "EUQkDI1EJECJRCQIi0UYiUQkBMcEJMUAAADoofz//4PEID0A8P//dhWJxv+T4BsAAPfeiTCwATHJ\n" +
-                        "6e0AAACLg9gbAACLi9wbAACLVCQkMcqLdCQgMcYJ1nUvCch0K4tEJEwLRCRQdSGD7Az/dRjo/f3/\n" +
-                        "/4PEED0A8P//dwyJRCRMx0QkUAAAAACLg9gbAACLi9wbAACLVCQkMcqLdCQgMcYJ1g+UwgnID5XA\n" +
-                        "INCJxrABi00Q9sEEdHAPV8APKYQkwAAAAA8phCSwAAAADymEJKAAAAAPKYQkkAAAAA8phCSAAAAA\n" +
-                        "x4Qk0AAAAAAAAACD7CAPEUQkDI2EJKAAAACJRCQIi0UYiUQkBMcEJA0BAADoq/v//4PEILmUGQIB\n" +
-                        "M4wkgAAAAAnBD5XAifGJyvbSIMKIVCQMic7/k+AbAAD3x/8PAAB0EMcAFgAAALj/////6ekBAACJ\n" +
-                        "RCQIi00gi1UMuLX////3wQDw//91NYnwAMAPtsALRRAPpPkUg+wEUf91GP91FFBS/3UIaMAAAADo\n" +
-                        "Lfv//4PEID0B8P//D4K4AAAAiVwkEDHJg/jzD5XBiUwkFDHbi00U9sECD5TDic7B7gWD5gExyYtV\n" +
-                        "EPbCBA+UwQ+2fCQMCd8J8QnPC3wkFHQS99iLTCQIiQG4/////+lMAQAAi1UU9sICD5TB90UgAPD/\n" +
-                        "/4tcJBCLfRx1OgpMJAx1NItNEIPh+4tFIA+k+BSD7ARQ/3UYUlH/dQz/dQhowAAAAOiJ+v//g8Qg\n" +
-                        "PQDw//8PhgEBAACLRCQIxwANAAAAuP/////p5QAAAInxhMmLTSAPhNgAAACJfCQciUQkGIN9DAAP\n" +
-                        "hJgAAACJzzHSi0QkGIlEJBCLTQzrLZCQkJCQkJCLTCQMKcGLVCQIg9oAAceJfCQci3wkFIPXAAHG\n" +
-                        "iXQkEInICdB0Wol8JBSJVCQIiUwkDIH5ABAAALgAEAAAD0LBhdK+ABAAAA9FxoPsBGoAV4t8JChX\n" +
-                        "UIt0JCRW/3UYaLQAAADoyPn//4PEIIXAf5GD+PyLfCQUi1QkCItMJAx0oIuD6BsAAItNDAHBSffY\n" +
-                        "IciD7ARqAGoAagD/dRBQi3QkMFZqfeiH+f//ifCDxCCNZfReX1tdw4PsIA9XwA8RRCQMi3UMiXQk\n" +
-                        "CIlEJATHBCRbAAAA6Fj5//+DxCA9AfD//3M5i0UQg8gCi00Ug8kgg+wEagBq/1FQVv91CGjAAAAA\n" +
-                        "6Cv5//+DxCA9AfD//4tNIA+DOv7//+m7/v//DwuQkJBVieVTg+Twg+ww6AAAAABbgcP56P//i0UI\n" +
-                        "i00MD1fADxFEJAyJTCQIiUQkBMcEJA0BAADo2Pj//41l/Ftdw5CQVYnlU4Pk8IPsEOgAAAAAW4HD\n" +
-                        "uej//4tNILi1////98EA8P//dSeLRRwPpMEUg+wEUf91GP91FP91EP91DP91CGjAAAAA6Ib4//+D\n" +
-                        "xCCNZfxbXcOQkJCQkJCQkJCQkJCQVYnlU4Pk8IPsMOgAAAAAW4HDWej//w8oRQiLRRiJRCQUDxFE\n" +
-                        "JATHRCQYAAAAAMcEJLQAAADoNvj//41l/Ftdw1WJ5VOD5PCD7BDoAAAAAFuBwxno//+D7ARqAGoA\n" +
-                        "agD/dRD/dQz/dQhqfegB+P//g8QgjWX8W13DkJCQkJCQkJBVieVTg+Twg+ww6AAAAABbgcPZ5///\n" +
-                        "DyhFCItFGItNHIlMJBSJRCQQDxEEJMdEJBgAAAAA6Jf6//+NZfxbXcOQVYnlU4Pk8IPsMOgAAAAA\n" +
-                        "W4HDmef//4tFCItNDA9XwA8RRCQMiUwkCIlEJATHBCRbAAAA6Hj3//+NZfxbXcOQkFWJ5VOD5PCD\n" +
-                        "7BDoAAAAAFuBw1nn//+D7ARqAGoAagD/dRD/dQz/dQhqA+hB9///g8QgjWX8W13DkJCQkJCQkJBV\n" +
-                        "ieVTg+Twg+wQ6AAAAABbgcMZ5///g+wEagBqAGoA/3UQ/3UM/3UIagToAff//4PEII1l/Ftdw5CQ\n" +
-                        "kJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HD2eb//w+3RRSD7ARqAGoAUP91EP91DP91CGgnAQAA6Lv2\n" +
-                        "//+DxCCNZfxbXcOQkFWJ5VOD5PCD7DDoAAAAAFuBw5nm//8PKEUIDxFEJATHRCQYAAAAAMdEJBQA\n" +
-                        "AAAAxwQkLAEAAOh19v//jWX8W13DkJCQkJCQkJCQkJCQkJCQVYnlU4Pk8IPsEOgAAAAAW4HDSeb/\n" +
-                        "/4PsBGoAagBqAP91DP91CGqcaCwBAADoL/b//4PEII1l/Ftdw5CQkJCQkFWJ5VOD5PCD7DDoAAAA\n" +
-                        "AFuBwwnm//+LRQiLTQwPV8APEUQkDIlMJAiJRCQExwQkxQAAAOjo9f//jWX8W13DkJBVieVTg+Tw\n" +
-                        "g+ww6AAAAABbgcPJ5f//i0UID1fADxFEJAiJRCQEx0QkGAAAAADHBCQGAAAA6Kf1//+NZfxbXcOQ\n" +
-                        "VYnlU4Pk8IPsEOgAAAAAW4HDieX//4PsBGoAagBqAP91EP91DP91CGo26HH1//+DxCCNZfxbXcOQ\n" +
-                        "kJCQkJCQkFWJ5VOD5PCD7DDoAAAAAFuBw0nl//+LRQgPV8APEUQkCIlEJATHRCQYAAAAAMcEJPwA\n" +
-                        "AADoJ/X//5CQkJCQkJBVieWD5PwPC5CQkJCQkJCQVYnlU1dWg+T8i00Qi0UIhckPhK0AAACLXQyI\n" +
-                        "GIhcCP+D+QMPgpsAAACIWAGIWAKIXAj+iFwI/YP5Bw+ChAAAAIhYA4hcCPyD+QlyeInH99+D5wON\n" +
-                        "FDgp+YPh/A+282n2AQEBAYk0OIl0EfyD+QlyVIlyBIlyCIl0CvSJdAr4g/kZckFmD27GZg9wwADz\n" +
-                        "D39CDPMPf0QK5InWg+YEg84YKfGD+SByHgHykJCQkJCQkJDzD38C8w9/QhCDweCDwiCD+R937I1l\n" +
-                        "9F5fW13DAAAAAAR3AAAAAAAAAAAAAAAAAADvvq/eAAAAABRFEQAAAAAAABAAAAAAAAA=\n";
+                        "ieVTg+Twg+ww6AAAAABbgcNJCgAAi0UIDyiD2P///w8RRCQIiUQkBMdEJBgAAAAAxwQkNgAAAOgT\n" +
+                        "/v//jWX8W13DkJCQkJCQkJCQkJCQkFWJ5YPk/OgAAAAAWIHA/QkAAI2A6P///4nsXcOQkJCQVYnl\n" +
+                        "g+T8i0UEiexdw5CQkFWJ5VNXVoPk8IPsIOgAAAAAW4HDxwkAAIt9DItFCA9XwA8RRCQMiXwkCIlE\n" +
+                        "JATHBCTFAAAA6Jb9//89AfD//3ITicb/k/D////33okwuP/////rVouL6P///4uT7P///4t3BDHW\n" +
+                        "iz8xzzHACfd1OwnRdDeLdQyLTiwLTjB1LItFCIkEJOj3/v//PQDw//93GIlGLMdGMAAAAADHRlwA\n" +
+                        "AAAAx0ZYAAAAADHAjWX0Xl9bXcOQkJCQkJCQkJCQkJCQkFWJ5VNXVoPk8IHs4AAAAOgAAAAAW4HD\n" +
+                        "BAkAAIt9HItFFLIBMcmDfRgAD4hyAQAAg+Aig/gCD4VmAQAAD1fADylEJHAPKUQkYA8pRCRQDylE\n" +
+                        "JEAPKUQkMA8pRCQgg+wgDxFEJAyNRCRAiUQkCItFGIlEJATHBCTFAAAA6JH8//+DxCA9APD//3YV\n" +
+                        "icb/k/D////33okwsAExyen9AAAAi4Po////i4vs////i1QkJDHKi3QkIDHGCdZ1PwnIdDuLRCRM\n" +
+                        "C0QkUHUxg+wM/3UY6O39//+DxBA9APD//3cciUQkTMdEJFAAAAAAx0QkfAAAAADHRCR4AAAAAIuD\n" +
+                        "6P///4uL7P///4tUJCQxyot0JCAxxgnWD5TCCcgPlcAg0InGsAGLTRD2wQR0cA9XwA8phCTAAAAA\n" +
+                        "DymEJLAAAAAPKYQkoAAAAA8phCSQAAAADymEJIAAAADHhCTQAAAAAAAAAIPsIA8RRCQMjYQkoAAA\n" +
+                        "AIlEJAiLRRiJRCQExwQkDQEAAOiL+///g8QguZQZAgEzjCSAAAAACcEPlcCJ8YnK9tIgwohUJAyJ\n" +
+                        "zv+T8P////fH/w8AAHQQxwAWAAAAuP/////p6QEAAIlEJAiLTSCLVQy4tf////fBAPD//3U1ifAA\n" +
+                        "wA+2wAtFEA+k+RSD7ARR/3UY/3UUUFL/dQhowAAAAOgN+///g8QgPQHw//8PgrgAAACJXCQQMcmD\n" +
+                        "+PMPlcGJTCQUMduLTRT2wQIPlMOJzsHuBYPmATHJi1UQ9sIED5TBD7Z8JAwJ3wnxCc8LfCQUdBL3\n" +
+                        "2ItMJAiJAbj/////6UwBAACLVRT2wgIPlMH3RSAA8P//i1wkEIt9HHU6CkwkDHU0i00Qg+H7i0Ug\n" +
+                        "D6T4FIPsBFD/dRhSUf91DP91CGjAAAAA6Gn6//+DxCA9APD//w+GAQEAAItEJAjHAA0AAAC4////\n" +
+                        "/+nlAAAAifGEyYtNIA+E2AAAAIl8JByJRCQYg30MAA+EmAAAAInPMdKLRCQYiUQkEItNDOstkJCQ\n" +
+                        "kJCQkItMJAwpwYtUJAiD2gABx4l8JByLfCQUg9cAAcaJdCQQicgJ0HRaiXwkFIlUJAiJTCQMgfkA\n" +
+                        "EAAAuAAQAAAPQsGF0r4AEAAAD0XGg+wEagBXi3wkKFdQi3QkJFb/dRhotAAAAOio+f//g8QghcB/\n" +
+                        "kYP4/It8JBSLVCQIi0wkDHSgi4P4////i00MAcFJ99ghyIPsBGoAagBqAP91EFCLdCQwVmp96Gf5\n" +
+                        "//+J8IPEII1l9F5fW13Dg+wgD1fADxFEJAyLdQyJdCQIiUQkBMcEJFsAAADoOPn//4PEID0B8P//\n" +
+                        "czmLRRCDyAKLTRSDySCD7ARqAGr/UVBW/3UIaMAAAADoC/n//4PEID0B8P//i00gD4M6/v//6bv+\n" +
+                        "//8PC5CQkFWJ5VOD5PCD7DDoAAAAAFuBw+kEAACLRQiLTQwPV8APEUQkDIlMJAiJRCQExwQkDQEA\n" +
+                        "AOi4+P//jWX8W13DkJBVieVTg+Twg+wQ6AAAAABbgcOpBAAAi00guLX////3wQDw//91J4tFHA+k\n" +
+                        "wRSD7ARR/3UY/3UU/3UQ/3UM/3UIaMAAAADoZvj//4PEII1l/Ftdw5CQkJCQkJCQkJCQkJBVieVT\n" +
+                        "g+Twg+ww6AAAAABbgcNJBAAADyhFCItFGIlEJBQPEUQkBMdEJBgAAAAAxwQktAAAAOgW+P//jWX8\n" +
+                        "W13DVYnlU4Pk8IPsEOgAAAAAW4HDCQQAAIPsBGoAagBqAP91EP91DP91CGp96OH3//+DxCCNZfxb\n" +
+                        "XcOQkJCQkJCQkFWJ5VOD5PCD7DDoAAAAAFuBw8kDAAAPKEUIi0UYi00ciUwkFIlEJBAPEQQkx0Qk\n" +
+                        "GAAAAADoh/r//41l/Ftdw5BVieVTg+Twg+ww6AAAAABbgcOJAwAAi0UIi00MD1fADxFEJAyJTCQI\n" +
+                        "iUQkBMcEJFsAAADoWPf//41l/Ftdw5CQVYnlU4Pk8IPsEOgAAAAAW4HDSQMAAIPsBGoAagBqAP91\n" +
+                        "EP91DP91CGoD6CH3//+DxCCNZfxbXcOQkJCQkJCQkFWJ5VOD5PCD7BDoAAAAAFuBwwkDAACD7ARq\n" +
+                        "AGoAagD/dRD/dQz/dQhqBOjh9v//g8QgjWX8W13DkJCQkJCQkJBVieVTg+Twg+wQ6AAAAABbgcPJ\n" +
+                        "AgAAD7dFFIPsBGoAagBQ/3UQ/3UM/3UIaCcBAADom/b//4PEII1l/Ftdw5CQVYnlU4Pk8IPsMOgA\n" +
+                        "AAAAW4HDiQIAAA8oRQgPEUQkBMdEJBgAAAAAx0QkFAAAAADHBCQsAQAA6FX2//+NZfxbXcOQkJCQ\n" +
+                        "kJCQkJCQkJCQkJBVieVTg+Twg+wQ6AAAAABbgcM5AgAAg+wEagBqAGoA/3UM/3UIapxoLAEAAOgP\n" +
+                        "9v//g8QgjWX8W13DkJCQkJCQVYnlU4Pk8IPsMOgAAAAAW4HD+QEAAItFCItNDA9XwA8RRCQMiUwk\n" +
+                        "CIlEJATHBCTFAAAA6Mj1//+NZfxbXcOQkFWJ5VOD5PCD7DDoAAAAAFuBw7kBAACLRQgPV8APEUQk\n" +
+                        "CIlEJATHRCQYAAAAAMcEJAYAAADoh/X//41l/Ftdw5BVieVTg+Twg+wQ6AAAAABbgcN5AQAAg+wE\n" +
+                        "agBqAGoA/3UQ/3UM/3UIajboUfX//4PEII1l/Ftdw5CQkJCQkJCQVYnlU4Pk8IPsMOgAAAAAW4HD\n" +
+                        "OQEAAItFCA9XwA8RRCQIiUQkBMdEJBgAAAAAxwQk/AAAAOgH9f//kJCQkJCQkFWJ5YPk/A8LkJCQ\n" +
+                        "kJCQkJBVieVTV1aD5PyLTRCLRQiFyQ+ErQAAAItdDIgYiFwI/4P5Aw+CmwAAAIhYAYhYAohcCP6I\n" +
+                        "XAj9g/kHD4KEAAAAiFgDiFwI/IP5CXJ4icf334PnA40UOCn5g+H8D7bzafYBAQEBiTQ4iXQR/IP5\n" +
+                        "CXJUiXIEiXIIiXQK9Il0CviD+RlyQWYPbsZmD3DAAPMPf0IM8w9/RArkidaD5gSDzhgp8YP5IHIe\n" +
+                        "AfKQkJCQkJCQkPMPfwLzD39CEIPB4IPCIIP5H3fsjWX0Xl9bXcMAAAAABHcAAAAAAAAAAAAAAAAA\n" +
+                        "AO++r94AAAAAFEURAAAAAAAAEAAAAAAAAAAQAAAAAAAAAAAAAA==\n";
         byte[] bytes = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
-        int hookInfoOffset = 0x0c20;
+        int hookInfoOffset = 0x0c40;
         fillInHookInfo(bytes, hookInfoOffset);
         return bytes;
     }
@@ -148,12 +149,12 @@ public class ShellcodeImpl_X86 extends BaseShellcode implements ISimpleInlineHoo
 
     @Override
     public int getFakeMmap64Offset() {
-        return 0x0330;
+        return 0x0340;
     }
 
     @Override
     public int getFakeMmapOffset() {
-        return 0x0860;
+        return 0x0880;
     }
 
     @Override

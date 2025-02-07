@@ -30,10 +30,10 @@ public class ShellcodeImpl_Arm32 extends BaseShellcode implements ISimpleInlineH
         //01a4 g    DF .text  0038 ashmem_dev_get_size_region
         //01dc g    DF .text  0010 get_hook_info
         //01ec g    DF .text  0008 get_current_pc
-        //01f4 g    DF .text  00e0 fake_fstat64
-        //02d4 g    DF .text  0480 fake_mmap64
-        //0858 g    DF .text  002c fake_mmap
-        //0bd0 l     O .rodata  0018 _ZZ13get_hook_infoE9sHookInfo
+        //01f4 g    DF .text  00ec fake_fstat64
+        //02e0 g    DF .text  0494 fake_mmap64
+        //0878 g    DF .text  002c fake_mmap
+        //0bf0 l     O .rodata  0018 _ZZ13get_hook_infoE9sHookInfo
         String b64 =
                 "cAAg4R7/L+EQTC3pCLCN4hDQTeICAKDhCBCb5RAgm+UYMJvlIMCb5TBAm+Uo4JvlAFCN6AhAjeUC\n" +
                         "AADrABCg4wjQS+IQjL3oMEgt6QiwjeIIUIviA+Cg4QDAoOEBAKDhAhCg4TgAlegOIKDhBHAt5Qxw\n" +
@@ -43,59 +43,59 @@ public class ShellcodeImpl_Arm32 extends BaseShellcode implements ISimpleInlineH
                         "sKDhAjCg4QgAm+UQEJvlGCCb5TP/L+EAEKDjAIi96ABILekNsKDhAsCg4QgAm+UQEJvlGCCb5SAw\n" +
                         "m+U8/y/hABCg4wCIvegQTC3pCLCN4gjQTeIAEJDlAECg4wRAjeVsI5HlBBCN4jL/L+EEEJ3lAABQ\n" +
                         "4wQQoBEBAKDhABCg4wjQS+IQjL3oAEgt6Q2woOEQ0E3iABCg4QAAoOMAAI3lBCcH4wQAjeUAMKDj\n" +
-                        "CACN5TYAoOOc///rC9Cg4QCIvegEAJ/lAACP4B7/L+HoCQAADgCg4R7/L+HwTS3pGLCN4hDQTeIB\n" +
-                        "QKDhAFCg4QBwoOPFAKDjBRCg4QQgoOEAMKDjAHCN5QRwjeUIcI3lhv//6wEKcOMKAACaAGCg4YgA\n" +
-                        "n+UAAI/gCACQ5TD/L+EAEGbiABCA5QBw4OMHAKDhGNBL4vCNvehkAJ/l0CDE4QAAj+AEAJDlWBCf\n" +
-                        "5QAwI+ABEJ/nASAi4AMgkuHy//8aAACR4fD//wowALTlBBCU5QEAkOHs//8aAIAP4wUAoOH/j0/j\n" +
-                        "vP//6wgAUOEAYKCR8GDEkQcAoOEY0Evi8I296IwJAABgCQAAUAkAAPBPLekcsI3i3NBN4hAAjeUD\n" +
-                        "UKDhFBCN5QKgoOFMZJ/lAJCg4wgAm+UBcKDjEICb5QZgj+AAAFDjXgAASiIABeICAFDjWwAAGnBw\n" +
-                        "jeJQAMDyCBCb5QAwoOMHAKDhByCg4c0KQPTNCkD0zQpA9M0KQPTNCkD0zQpA9ACQgOXFAKDj1JCN\n" +
-                        "5QCQjeUEkI3lCJCN5Tf//+sBCnDjBgAAmgBAoOEIAJblMP8v4QAQZOIAEIDlAQCg4z4AAOpwIJ3l\n" +
-                        "dDCd5QQAluWoE5/lADAj4AEQn+cBICLgAyCS4Q0AABoAAJHhCwAACqAAneWkEJ3lAQCQ4QcAABoI\n" +
-                        "AJvlAEAP4/9PT+Ny///rBABQ4TAQh5IAMKCTCQCBmHAAneV0EJ3lBCCW5VAzn+UCECHgAzCf5wMA\n" +
-                        "IOABAIDhAhCT4RAPb+EBEAATBAAa46ACoOEBkADgAQCg4xcAAAoYII3iUADA8gAQoOMAMKDjAgCg\n" +
-                        "4WwQjeXNCkD0zQpA9M0KQPTNCkD0zQpA9AAQgOULAQDjABCN5QQQjeUIEI3lCBCb5fX+/+sYEJ3l\n" +
-                        "lCkB4wIhQOMCECHgAQCQ4QEAABMJcMDhCACW5TD/L+H/HwDjFmCg4wEAGOEqAAAaFECb5UoQ4OMM\n" +
-                        "oI3lJKaw4REAABoIEJvlAGCg4QwwneUoBqDhBBCN5QAAWeMQEJ3lBAqA4RQgneUCMIMTCACN5cAA\n" +
-                        "oOMAUI3l1f7/6wAQoOEBCnDjGQAAmgYAoOEMIJ3lpTDg4Q0AceMiIeDhpSKC4QMgguEBIALiByCC\n" +
-                        "4QEgABMAAFLjAQAACgBgYeIGAADqAABa4w1goOMCEAUCASCgA6EQIgAHEJEBPQAACgBggOUAEODj\n" +
-                        "AQCg4RzQS+Lwj73oAABZ4/r//woUAJ3lEBCN5QAAUOMbAAAKEHCd5QBQoOMUoJ3lAZqg4wBgoOMG\n" +
-                        "AADqAICY4AdwgOAAQKTiAKBa4ABgxuIGAJrhDgAACgEKWuMBOqDjCBCb5QowoDEAAFbjtACg4wkw\n" +
-                        "oBEHIKDhIAGN6AhAjeWa/v/rAABQ4+v//8oEAHDj7v//Clxhn+UAEKDjABCN5QZgj+AEEI3lCBCN\n" +
-                        "5RQQneUQAJblAUBB4gxQneUAEITgAABg4gAgAeAQEJ3lfQCg4wUwoOGF/v/rBAAV4zMAABoQEJ3l\n" +
-                        "AQCg4RzQS+Lwj73oKBag4Qggm+UEGoHhDHCd5QQgjeUAoKDhCBCN5QQwx+MQEJ3lwACg4xQgneUA\n" +
-                        "UI3lcv7/6wAQoOEKAKDhAQpx47D//4oUkJ3lAGCg41sAoOMAMKDjAGCN5QkgoOEEYI3lCGCN5WX+\n" +
-                        "/+sAEA/j/x9P4wEQgeIBAFDhHgAAKiAQheMAEI3lEBCd5QAA4OMCMIfjQQCN6cAAoOMJIKDhV/7/\n" +
-                        "6wAQoOEAAA/j/w9P4wAAUeGb//+aAGBh4goAoOGR///qEDCd5RAQluUDcITgACBh4gEQh+ACcADj\n" +
-                        "AwAC4AIQAeAPcEDjACCg4wAAAO8DEKDhAABQ44X//wr+3v/nxAgAACgIAADMBwAA0AUAAABILekN\n" +
-                        "sKDhENBN4gEgoOEAEKDhAACg4wAwoOMAAI3lBACN5QgAjeULAQDjMP7/6wvQoOEAiL3oEEwt6Qiw\n" +
-                        "jeIQ0E3iAsCg4RQgm+UB4KDhABCg4SIGsOFKAODjCQAAGhAAm+UIQJvlGACN6AwwoOEgBqDhAgqA\n" +
-                        "4QgAjeXAAKDjDiCg4Rr+/+sI0EviEIy96ABILekNsKDhENBN4gIwoOEBIKDhABCg4QAAoOMI4Jvl\n" +
-                        "DMCb5QFAjei0AKDjCMCN5Qv+/+sL0KDhAIi96ABILekNsKDhENBN4gIwoOEBIKDhABCg4QAAoOMA\n" +
-                        "AI3lBACN5QgAjeV9AKDj/f3/6wvQoOEAiL3oMEgt6QiwjeIQ0E3iCMCb5QBQoOMMQJvl+EDN4QDA\n" +
-                        "jeWV/v/rCNBL4jCIvegASC3pDbCg4RDQTeIBIKDhABCg4QAAoOMAMKDjAACN5QQAjeUIAI3lWwCg\n" +
-                        "4+T9/+sL0KDhAIi96ABILekNsKDhENBN4gIwoOEBIKDhABCg4QAAoOMAAI3lBACN5QgAjeUDAKDj\n" +
-                        "1v3/6wvQoOEAiL3oAEgt6Q2woOEQ0E3iAjCg4QEgoOEAEKDhAACg4wAAjeUEAI3lCACN5QQAoOPI\n" +
-                        "/f/rC9Cg4QCIvegASC3pDbCg4RDQTeICwKDhASCg4QAQoOEAAKDjADCN5QwwoOEEAI3lCACN5UIB\n" +
-                        "AOO5/f/rC9Cg4QCIvegASC3pDbCg4RDQTeICwKDhASCg4QAQoOEAAKDjADCN5QwwoOEEAI3lCACN\n" +
-                        "5UcBAOOq/f/rC9Cg4QCIvegASC3pDbCg4RDQTeIAIKDhAACg4wEwoOEAAI3lBACN5WMQ4OMIAI3l\n" +
-                        "RwEA45z9/+sL0KDhAIi96ABILekNsKDhENBN4gEgoOEAEKDhAACg4wAwoOMAAI3lBACN5QgAjeXF\n" +
-                        "AKDjjv3/6wvQoOEAiL3oAEgt6Q2woOEQ0E3iABCg4QAAoOMAAI3lACCg4wQAjeUAMKDjCACN5QYA\n" +
-                        "oOOA/f/rC9Cg4QCIvegASC3pDbCg4RDQTeICMKDhASCg4QAQoOEAAKDjAACN5QQAjeUIAI3lNgCg\n" +
-                        "43L9/+sL0KDhAIi96ABILekNsKDhENBN4gAQoOEAAKDjAACN5QAgoOMEAI3lADCg4wgAjeX4AKDj\n" +
-                        "ZP3/6/7e/+cAAFLjPwAACgAwoOEDAFLjAhDD5gEQQ+U6AAA6BwBS4wIQwOUBEMDlAxBD5QIQQ+U0\n" +
-                        "AAA6CQBS4wMQwOUEEEPlHv8vMQBILekNsKDhATEA43EQ7+YBMUDjkQMB4AAwYOIDwAPiADCg4Qwg\n" +
-                        "QuAMEKPnA8DC4wwgg+AJAFzjBBAC5R8AADoZAFzjBBCD5QgQg+UMEALlCBAC5RkAADoMEIPlEBCD\n" +
-                        "5RQQg+UYEIPlHBAC5RgQAuUUEALlEBAC5QQgA+IY4ILjDiBM4CAAUuMMAAA6DjCD4CAgQuIAEIPl\n" +
-                        "BBCD5R8AUuMIEIPlDBCD5RAQg+UUEIPlGBCD5RwQg+UgMIPi8///igBIvege/y/hAAAAAAAAAAAA\n" +
-                        "AAAA776v3gAAAAAURREAAAAAAAAQAAAAAAAAGPT/fwEAAAAY9P9/AQAAAFD0/38BAAAAgPT/fwEA\n" +
-                        "AACo9P9/AQAAAMD0/38BAAAAzPT/fwEAAADc9P9/AQAAAPD0/38BAAAADPX/fwEAAAAs9f9/AQAA\n" +
-                        "AGT1/38BAAAAlPX/fwEAAACc9f9/AQAAAJz1/38BAAAAdPb/fwEAAADs+v9/AQAAABz7/38BAAAA\n" +
-                        "bPv/fwEAAACg+/9/AQAAAND7/38BAAAA9Pv/fwEAAAAk/P9/AQAAAFT8/38BAAAAhPz/fwEAAAC4\n" +
-                        "/P9/AQAAAOz8/38BAAAAHP3/fwEAAABM/f9/AQAAAHz9/38BAAAArP3/fwEAAADU/f9/AQAAAND9\n" +
-                        "/38BAAAA1P7/fwEAAAA=\n";
+                        "CACN5TYAoOOc///rC9Cg4QCIvegEAJ/lAACP4B7/L+EICgAADgCg4R7/L+HwTS3pGLCN4hDQTeIB\n" +
+                        "QKDhAFCg4QBwoOPFAKDjBRCg4QQgoOEAMKDjAHCN5QRwjeUIcI3lhv//6wEKcOMKAACaAGCg4ZQA\n" +
+                        "n+UAAI/gCACQ5TD/L+EAEGbiABCA5QBw4OMHAKDhGNBL4vCNvehwAJ/l0CDE4QAAj+AEAJDlZBCf\n" +
+                        "5QAwI+ABEJ/nASAi4AMgkuHy//8aAACR4fD//wowYITi0ADG4QEAkOHs//8aAIAP4wUAoOH/j0/j\n" +
+                        "vP//6wgAUOHm//+KYBCE4oEAhugAcIHlBHCB5QcAoOEY0Evi8I296KwJAACACQAAcAkAAPBPLekc\n" +
+                        "sI3i3NBN4hAAjeUDUKDhFBCN5QKgoOFgZJ/lAJCg4wgAm+UBcKDjEICb5QZgj+AAAFDjYwAASiIA\n" +
+                        "BeICAFDjYAAAGnBwjeJQAMDyCBCb5QAwoOMHAKDhByCg4c0KQPTNCkD0zQpA9M0KQPTNCkD0zQpA\n" +
+                        "9ACQgOXFAKDj1JCN5QCQjeUEkI3lCJCN5TT//+sBCnDjBgAAmgBAoOEIAJblMP8v4QAQZOIAEIDl\n" +
+                        "AQCg40MAAOpwIJ3ldDCd5QQAluW8E5/lADAj4AEQn+cBICLgAyCS4RIAABoAAJHhEAAACjBAh+LQ\n" +
+                        "AMThAQCQ4QwAABoIAJvlBpCg4QBgD+P/b0/jbv//6wYAUOEJYKDhBAAAimAQh+IAMKDjCQCE6AAw\n" +
+                        "geUEMIHlcACd5XQQneUEIJblUDOf5QIQIeADMJ/nAwAg4AEAgOECEJPhEA9v4QEQABMEABrjoAKg\n" +
+                        "4QGQAOABAKDjFwAAChggjeJQAMDyABCg4wAwoOMCAKDhbBCN5c0KQPTNCkD0zQpA9M0KQPTNCkD0\n" +
+                        "ABCA5QsBAOMAEI3lBBCN5QgQjeUIEJvl7f7/6xgQneWUKQHjAiFA4wIQIeABAJDhAQAAEwlwwOEI\n" +
+                        "AJblMP8v4f8fAOMWYKDjAQAY4SoAABoUQJvlShDg4wygjeUkprDhEQAAGggQm+UAYKDhDDCd5SgG\n" +
+                        "oOEEEI3lAABZ4xAQneUECoDhFCCd5QIwgxMIAI3lwACg4wBQjeXN/v/rABCg4QEKcOMZAACaBgCg\n" +
+                        "4QwgneWlMODhDQBx4yIh4OGlIoLhAyCC4QEgAuIHIILhASAAEwAAUuMBAAAKAGBh4gYAAOoAAFrj\n" +
+                        "DWCg4wIQBQIBIKADoRAiAAcQkQE9AAAKAGCA5QAQ4OMBAKDhHNBL4vCPvegAAFnj+v//ChQAneUQ\n" +
+                        "EI3lAABQ4xsAAAoQcJ3lAFCg4xSgneUBmqDjAGCg4wYAAOoAgJjgB3CA4ABApOIAoFrgAGDG4gYA\n" +
+                        "muEOAAAKAQpa4wE6oOMIEJvlCjCgMQAAVuO0AKDjCTCgEQcgoOEgAY3oCECN5ZL+/+sAAFDj6///\n" +
+                        "ygQAcOPu//8KXGGf5QAQoOMAEI3lBmCP4AQQjeUIEI3lFBCd5RAAluUBQEHiDFCd5QAQhOAAAGDi\n" +
+                        "ACAB4BAQneV9AKDjBTCg4X3+/+sEABXjMwAAGhAQneUBAKDhHNBL4vCPvegoFqDhCCCb5QQageEM\n" +
+                        "cJ3lBCCN5QCgoOEIEI3lBDDH4xAQneXAAKDjFCCd5QBQjeVq/v/rABCg4QoAoOEBCnHjsP//ihSQ\n" +
+                        "neUAYKDjWwCg4wAwoOMAYI3lCSCg4QRgjeUIYI3lXf7/6wAQD+P/H0/jARCB4gEAUOEeAAAqIBCF\n" +
+                        "4wAQjeUQEJ3lAADg4wIwh+NBAI3pwACg4wkgoOFP/v/rABCg4QAAD+P/D0/jAABR4Zv//5oAYGHi\n" +
+                        "CgCg4ZH//+oQMJ3lEBCW5QNwhOAAIGHiARCH4AJwAOMDAALgAhAB4A9wQOMAIKDjAAAA7wMQoOEA\n" +
+                        "AFDjhf//Cv7e/+fYCAAAPAgAAMwHAADQBQAAAEgt6Q2woOEQ0E3iASCg4QAQoOEAAKDjADCg4wAA\n" +
+                        "jeUEAI3lCACN5QsBAOMo/v/rC9Cg4QCIvegQTC3pCLCN4hDQTeICwKDhFCCb5QHgoOEAEKDhIgaw\n" +
+                        "4UoA4OMJAAAaEACb5QhAm+UYAI3oDDCg4SAGoOECCoDhCACN5cAAoOMOIKDhEv7/6wjQS+IQjL3o\n" +
+                        "AEgt6Q2woOEQ0E3iAjCg4QEgoOEAEKDhAACg4wjgm+UMwJvlAUCN6LQAoOMIwI3lA/7/6wvQoOEA\n" +
+                        "iL3oAEgt6Q2woOEQ0E3iAjCg4QEgoOEAEKDhAACg4wAAjeUEAI3lCACN5X0AoOP1/f/rC9Cg4QCI\n" +
+                        "vegwSC3pCLCN4hDQTeIIwJvlAFCg4wxAm+X4QM3hAMCN5ZD+/+sI0EviMIi96ABILekNsKDhENBN\n" +
+                        "4gEgoOEAEKDhAACg4wAwoOMAAI3lBACN5QgAjeVbAKDj3P3/6wvQoOEAiL3oAEgt6Q2woOEQ0E3i\n" +
+                        "AjCg4QEgoOEAEKDhAACg4wAAjeUEAI3lCACN5QMAoOPO/f/rC9Cg4QCIvegASC3pDbCg4RDQTeIC\n" +
+                        "MKDhASCg4QAQoOEAAKDjAACN5QQAjeUIAI3lBACg48D9/+sL0KDhAIi96ABILekNsKDhENBN4gLA\n" +
+                        "oOEBIKDhABCg4QAAoOMAMI3lDDCg4QQAjeUIAI3lQgEA47H9/+sL0KDhAIi96ABILekNsKDhENBN\n" +
+                        "4gLAoOEBIKDhABCg4QAAoOMAMI3lDDCg4QQAjeUIAI3lRwEA46L9/+sL0KDhAIi96ABILekNsKDh\n" +
+                        "ENBN4gAgoOEAAKDjATCg4QAAjeUEAI3lYxDg4wgAjeVHAQDjlP3/6wvQoOEAiL3oAEgt6Q2woOEQ\n" +
+                        "0E3iASCg4QAQoOEAAKDjADCg4wAAjeUEAI3lCACN5cUAoOOG/f/rC9Cg4QCIvegASC3pDbCg4RDQ\n" +
+                        "TeIAEKDhAACg4wAAjeUAIKDjBACN5QAwoOMIAI3lBgCg43j9/+sL0KDhAIi96ABILekNsKDhENBN\n" +
+                        "4gIwoOEBIKDhABCg4QAAoOMAAI3lBACN5QgAjeU2AKDjav3/6wvQoOEAiL3oAEgt6Q2woOEQ0E3i\n" +
+                        "ABCg4QAAoOMAAI3lACCg4wQAjeUAMKDjCACN5fgAoONc/f/r/t7/5wAAUuM/AAAKADCg4QMAUuMC\n" +
+                        "EMPmARBD5ToAADoHAFLjAhDA5QEQwOUDEEPlAhBD5TQAADoJAFLjAxDA5QQQQ+Ue/y8xAEgt6Q2w\n" +
+                        "oOEBMQDjcRDv5gExQOORAwHgADBg4gPAA+IAMKDhDCBC4AwQo+cDwMLjDCCD4AkAXOMEEALlHwAA\n" +
+                        "OhkAXOMEEIPlCBCD5QwQAuUIEALlGQAAOgwQg+UQEIPlFBCD5RgQg+UcEALlGBAC5RQQAuUQEALl\n" +
+                        "BCAD4hjgguMOIEzgIABS4wwAADoOMIPgICBC4gAQg+UEEIPlHwBS4wgQg+UMEIPlEBCD5RQQg+UY\n" +
+                        "EIPlHBCD5SAwg+Lz//+KAEi96B7/L+EAAAAAAAAAAAAAAADvvq/eAAAAABRFEQAAAAAAABAAAAAA\n" +
+                        "AAD48/9/AQAAAPjz/38BAAAAMPT/fwEAAABg9P9/AQAAAIj0/38BAAAAoPT/fwEAAACs9P9/AQAA\n" +
+                        "ALz0/38BAAAA0PT/fwEAAADs9P9/AQAAAAz1/38BAAAARPX/fwEAAAB09f9/AQAAAHz1/38BAAAA\n" +
+                        "fPX/fwEAAABg9v9/AQAAAOz6/38BAAAAHPv/fwEAAABs+/9/AQAAAKD7/38BAAAA0Pv/fwEAAAD0\n" +
+                        "+/9/AQAAACT8/38BAAAAVPz/fwEAAACE/P9/AQAAALj8/38BAAAA7Pz/fwEAAAAc/f9/AQAAAEz9\n" +
+                        "/38BAAAAfP3/fwEAAACs/f9/AQAAANT9/38BAAAA0P3/fwEAAADU/v9/AQAAAA==\n";
         byte[] bytes = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
-        int hookInfoOffset = 0x0bd0;
+        int hookInfoOffset = 0x0bf0;
         fillInHookInfo(bytes, hookInfoOffset);
         return bytes;
     }
@@ -152,12 +152,12 @@ public class ShellcodeImpl_Arm32 extends BaseShellcode implements ISimpleInlineH
 
     @Override
     public int getFakeMmap64Offset() {
-        return 0x02d4;
+        return 0x02e0;
     }
 
     @Override
     public int getFakeMmapOffset() {
-        return 0x0858;
+        return 0x0878;
     }
 
     @Override
