@@ -27,6 +27,9 @@ EXPORT int fake_fstat64(int fd, kernel_stat64_compat* buf) {
         if (!is_error(ssize)) {
             // overwrite the st_size
             stat->st_size = (kernel_off_t) (size_t) ssize;
+            // override the st_ino with 0
+            // to avoid the linker being confused with the same inode number for different shared libraries
+            stat->st_ino = 0;
         }
     }
     return 0;
