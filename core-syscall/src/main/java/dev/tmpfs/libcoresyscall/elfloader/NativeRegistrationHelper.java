@@ -15,12 +15,18 @@ import java.util.Objects;
 
 import dev.tmpfs.libcoresyscall.core.NativeAccess;
 
+/**
+ * A helper class for registering native methods in a library.
+ */
 public class NativeRegistrationHelper {
 
     private NativeRegistrationHelper() {
         throw new AssertionError("no instances");
     }
 
+    /**
+     * A summary of the registration results.
+     */
     public static class RegistrationSummary {
         // The methods that were successfully registered by this invocation.
         public final ArrayList<Method> registeredMethods = new ArrayList<>();
@@ -71,6 +77,15 @@ public class NativeRegistrationHelper {
         return JNI_NATIVE_REGISTRATION_SUCCESS;
     }
 
+    /**
+     * Finds all native methods declared in the given classes and registers them with the specified library.
+     * <p>
+     * Note that native methods which are already registered will be skipped and will not be overridden.
+     *
+     * @param handle  the handle of the library, as returned by {@link DlExtLibraryLoader#dlopen}
+     * @param klasses the classes to search for native methods
+     * @return a summary of the registration process
+     */
     public static RegistrationSummary findAndRegisterNativeMethods(long handle, @NonNull Class<?>[] klasses) {
         if (handle == 0) {
             throw new IllegalArgumentException("library handle is null");
@@ -78,6 +93,15 @@ public class NativeRegistrationHelper {
         return findAndRegisterNativeMethods(new DefaultNativeLibraryPublicSymbolResolver(handle), klasses);
     }
 
+    /**
+     * Finds all native methods declared in the given classes and registers them with the specified library.
+     * <p>
+     * Note that native methods which are already registered will be skipped and will not be overridden.
+     *
+     * @param resolver the symbol resolver to use to find the native method implementations
+     * @param klasses  the classes to search for native methods
+     * @return a summary of the registration process
+     */
     public static RegistrationSummary findAndRegisterNativeMethods(@NonNull NativeLibrarySymbolResolver resolver, @NonNull Class<?>[] klasses) {
         RegistrationSummary summary = new RegistrationSummary();
         for (Class<?> klass : klasses) {
@@ -120,21 +144,48 @@ public class NativeRegistrationHelper {
 
     }
 
+    /**
+     * Gets the short JNI symbol name for the given method.
+     *
+     * @param method the method to get the JNI symbol name for
+     * @return the short JNI symbol name, e.g. "Java_com_example_Foo_bar"
+     */
     @NonNull
     public static String getJniShortName(@NonNull Method method) {
         return getJniShortName(method.getDeclaringClass().getName(), method.getName());
     }
 
+    /**
+     * Gets the long JNI symbol name for the given method.
+     *
+     * @param method the method to get the JNI symbol name for
+     * @return the long JNI symbol name, e.g. "Java_com_example_Foo_bar__I"
+     */
     @NonNull
     public static String getJniLongName(@NonNull Method method) {
         return getJniLongName(method.getDeclaringClass().getName(), method.getName(), method.getParameterTypes());
     }
 
+    /**
+     * Gets the short JNI symbol name for the given class and method names.
+     *
+     * @param className  the class name, e.g. "com.example.Foo"
+     * @param methodName the method name, e.g. "bar"
+     * @return the short JNI symbol name, e.g. "Java_com_example_Foo_bar"
+     */
     @NonNull
     public static String getJniShortName(@NonNull String className, @NonNull String methodName) {
         return "Java_" + mangleForJni(className) + "_" + mangleForJni(methodName);
     }
 
+    /**
+     * Gets the long JNI symbol name for the given class, method, and argument types.
+     *
+     * @param className  the class name, e.g. "com.example.Foo"
+     * @param methodName the method name, e.g. "bar"
+     * @param argTypes   the argument types
+     * @return the long JNI symbol name, e.g. "Java_com_example_Foo_bar__I"
+     */
     @NonNull
     public static String getJniLongName(@NonNull String className, @NonNull String methodName, @NonNull Class<?>[] argTypes) {
         StringBuilder sb = new StringBuilder();
@@ -149,6 +200,12 @@ public class NativeRegistrationHelper {
         return sb.toString();
     }
 
+    /**
+     * Get the JNI type signature for the given type.
+     *
+     * @param type the type, e.g. int.class or String.class
+     * @return e.g. "I" for int.class, "Ljava/lang/String;" for String.class
+     */
     @NonNull
     public static String getTypeSignature(@NonNull Class<?> type) {
         if (type == Void.TYPE) {
