@@ -163,14 +163,6 @@ public class ArtMethodHelper {
                 throw new IllegalArgumentException("address overflow in 32-bit mode: " + Long.toHexString(address));
             }
         }
-        try {
-            Class<?> declaringClass = method.getDeclaringClass();
-            // JNI specification says that the class needs to be initialized before the native method is registered
-            Class.forName(declaringClass.getName(), true, declaringClass.getClassLoader());
-        } catch (ClassNotFoundException e) {
-            // should not happen
-            throw ReflectHelper.unsafeThrow(e);
-        }
         if (Build.VERSION.SDK_INT < 23) {
             Object artMethod = getArtMethodObjectBelowSdk23(method);
             if (artMethod == null) {
