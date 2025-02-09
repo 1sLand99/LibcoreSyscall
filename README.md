@@ -12,6 +12,7 @@ load any in-memory ELF shared objects (lib*.so) without a writable path/mount po
 - Implemented in 100% pure Java 1.8
 - No shared libraries (lib*.so) or assets files are shipped with the library (whole library as a single dex file version 035)
 - No `System.loadLibrary` or `System.load` is used
+- Support passive JNI registration (e.g. `Java_com_example_test_app_TestNativeLoader_nativeMethod`)
 - No temporary files are created on the disk (does not require a writable path/mount point)
 - No blocklisted hidden APIs are used
 - Small, no dependencies (less than 100 KiB)
@@ -28,6 +29,8 @@ The library provides the following classes:
 - [Syscall](core-syscall/src/main/java/dev/tmpfs/libcoresyscall/core/Syscall.java): Make any Linux system calls.
 - [DlExtLibraryLoader](core-syscall/src/main/java/dev/tmpfs/libcoresyscall/elfloader/DlExtLibraryLoader.java):
   Load any ELF shared objects (lib*.so) directly from memory.
+- [NativeRegistrationHelper](core-syscall/src/main/java/dev/tmpfs/libcoresyscall/elfloader/NativeRegistrationHelper.java):
+  Helper class to register native methods for the native library.
 
 ## Examples
 
