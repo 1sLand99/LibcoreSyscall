@@ -4,10 +4,9 @@ import android.content.Context;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
-
-import com.tencent.mmkv.MMKV;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,18 +14,23 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import dev.tmpfs.libcoresyscall.core.NativeAccess;
 import dev.tmpfs.libcoresyscall.core.NativeHelper;
 import dev.tmpfs.libcoresyscall.core.impl.ReflectHelper;
 import dev.tmpfs.libcoresyscall.elfloader.DlExtLibraryLoader;
+import dev.tmpfs.libcoresyscall.elfloader.NativeRegistrationHelper;
 
 public class TestNativeLoader {
 
     private TestNativeLoader() {
     }
 
-    private static long sHandle;
+    private static final Map<String, Long> sHandleMap = new HashMap<>();
+
+    public static String sLoadLog = "";
 
     public static String getNativeLibraryDirName(int isa) {
         switch (isa) {
@@ -101,28 +105,24 @@ public class TestNativeLoader {
         return fd;
     }
 
-    public static long initialize(@NonNull Context ctx) {
-        load();
-        if (sHandle != 0) {
-            MMKV.initialize(ctx, libName -> {
-                // no-op
-            });
-            return sHandle;
-        }
-        return 0;
-    }
 
-    public static long load() {
-        if (sHandle != 0) {
-            return sHandle;
+    public static synchronized long load(String soname) {
+        if (sHandleMap.containsKey(soname)) {
+            return sHandleMap.get(soname);
         }
-        String soname = "libmmkv.so";
+
         byte[] elfData = getElfData(soname);
 
-        sHandle = DlExtLibraryLoader.dlopenExtFromMemory(elfData, soname, DlExtLibraryLoader.RTLD_NOW, 0, 0);
+        long handle = DlExtLibraryLoader.dlopenExtFromMemory(elfData, soname, DlExtLibraryLoader.RTLD_NOW, 0, 0);
 
-        if (sHandle != 0) {
-            long jniOnLoad = DlExtLibraryLoader.dlsym(sHandle, "JNI_OnLoad");
+        if (handle != 0) {
+            NativeRegistrationHelper.RegistrationSummary summary =
+                    NativeRegistrationHelper.registerNativeMethodsForLibrary(handle, elfData);
+
+            Log.d("TestNativeLoader", soname + ": registerNativeMethodsForLibrary: " + summary);
+            sLoadLog += soname + ": registerNativeMethodsForLibrary: " + summary + "\n";
+
+            long jniOnLoad = DlExtLibraryLoader.dlsym(handle, "JNI_OnLoad");
             if (jniOnLoad != 0) {
                 long javaVm = NativeAccess.getJavaVM();
                 long ret = NativeAccess.callPointerFunction(jniOnLoad, javaVm, 0);
@@ -131,7 +131,10 @@ public class TestNativeLoader {
                 }
             }
         }
-        return sHandle;
+        sHandleMap.put(soname, handle);
+        Log.d("TestNativeLoader", soname + " -> " + handle);
+        sLoadLog += soname + " -> " + handle + "\n";
+        return handle;
     }
 
 }

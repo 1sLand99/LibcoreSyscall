@@ -135,7 +135,7 @@ public class StandaloneTest {
         } catch (Exception e) {
             System.out.println("Can map memfd as executable: " + e);
         }
-        long handle = TestNativeLoader.load();
+        long handle = TestNativeLoader.load("libmmkv.so");
         System.out.println("Handle: " + handle);
     }
 

@@ -22,7 +22,11 @@ import androidx.annotation.Nullable;
 
 import com.tencent.mmkv.MMKV;
 
+import org.luckypray.dexkit.DexKitBridge;
+import org.luckypray.dexkit.query.FindClass;
+
 import java.io.FileInputStream;
+import java.util.List;
 
 import dev.tmpfs.libcoresyscall.core.IAllocatedMemory;
 import dev.tmpfs.libcoresyscall.core.MemoryAccess;
@@ -184,13 +188,26 @@ public class TestMainActivity extends Activity {
             sb.append("domainname = ").append(MemoryAccess.peekCString(utsAddress + domainnameOffset));
             sb.append("\n");
             sb.append("Native load test: \n");
-            sb.append("handle = ").append(TestNativeLoader.initialize(this));
+            Long handle = TestNativeLoader.load("libmmkv.so");
+            MMKV.initialize(this, ctx -> {
+            });
+            sb.append("mmkv handle = ").append(handle);
             sb.append("\n");
             sb.append("MMKV.version = ").append(MMKV.version());
+            sb.append("\n");
+            handle = TestNativeLoader.load("libdexkit.so");
+            sb.append("dexkit handle = ").append(handle);
+            sb.append("\n");
+            try (DexKitBridge bridge = DexKitBridge.create(this.getClassLoader(), false)) {
+                List<?> clsList = bridge.findClass(FindClass.create());
+                sb.append("dexkit search class count: ").append(clsList.size());
+            }
         } catch (Exception | LinkageError | AssertionError e) {
             sb.append('\n').append("FAIL: \n").append(Log.getStackTraceString(e));
             Log.e("TestMainActivity", "runTests", e);
         }
+        sb.append("\n");
+        sb.append(TestNativeLoader.sLoadLog);
         sb.append("\n");
         sb.append("cat /proc/self/maps | grep libmmkv.so\n");
         sb.append(catProcSelfMapsAndGrep("libmmkv.so"));

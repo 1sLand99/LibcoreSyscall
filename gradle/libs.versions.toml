@@ -6,6 +6,7 @@ compileSdk = "35"
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 # for test elf loader
 tencent-mmkv = { module = "com.tencent:mmkv-static", version = "1.3.11" }
+luckypray-dexkit = { module = "org.luckypray:dexkit", version = "2.0.3" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

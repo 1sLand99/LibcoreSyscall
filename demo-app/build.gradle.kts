@@ -29,6 +29,7 @@ android {
         implementation(libs.androidx.annotation)
         implementation(projects.coreSyscall)
         implementation(libs.tencent.mmkv)
+        implementation(libs.luckypray.dexkit)
     }
 
     // force Java 8
