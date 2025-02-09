@@ -3,10 +3,15 @@ package dev.tmpfs.libcoresyscall.elfloader;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 
 import dev.tmpfs.libcoresyscall.core.NativeAccess;
 
@@ -23,6 +28,16 @@ public class NativeRegistrationHelper {
         public final ArrayList<Method> missedMethods = new ArrayList<>();
         // The methods that were already registered.
         public final ArrayList<Method> skippedMethods = new ArrayList<>();
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "RegistrationSummary{" +
+                    "registeredMethods=" + registeredMethods +
+                    ", missedMethods=" + missedMethods +
+                    ", skippedMethods=" + skippedMethods +
+                    '}';
+        }
     }
 
     public interface NativeLibrarySymbolResolver {
@@ -184,6 +199,133 @@ public class NativeRegistrationHelper {
             }
         }
         return result.toString();
+    }
+
+    /**
+     * See {@link #registerNativeMethodsForLibrary(long, byte[], ClassLoader)}, where the current class loader is used.
+     */
+    public static RegistrationSummary registerNativeMethodsForLibrary(long handle, @NonNull byte[] elfData) {
+        ClassLoader currentClassLoader = NativeRegistrationHelper.class.getClassLoader();
+        assert currentClassLoader != null;
+        return registerNativeMethodsForLibrary(handle, elfData, currentClassLoader);
+    }
+
+    /**
+     * Gets the class name for the given JNI symbol name.
+     *
+     * @param symbolName the JNI symbol name, e.g. "Java_com_example_Foo_bar" or "Java_com_example_Foo_bar__I"
+     * @return the class name, e.g. "com.example.Foo", or null if the symbol name is not a valid JNI symbol name
+     */
+    @Nullable
+    public static String getClassNameForJniSymbolName(@NonNull String symbolName) {
+        if (!symbolName.startsWith("Java_")) {
+            return null;
+        }
+        char[] chars = symbolName.toCharArray();
+        StringBuilder sb = new StringBuilder();
+        int i = "Java_".length();
+        try {
+            while (i < chars.length) {
+                char ch = chars[i];
+                if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) {
+                    // normal character
+                    sb.append(ch);
+                    i++;
+                } else if (ch == '_') {
+                    // peek next char
+                    char second = chars[i + 1];
+                    if (second == '1') {
+                        // '_1' -> '_'
+                        sb.append('_');
+                        i += 2;
+                    } else if (second == '2') {
+                        // '_2' -> ';'
+                        sb.append(';');
+                        i += 2;
+                    } else if (second == '3') {
+                        // '_3' -> '['
+                        sb.append('[');
+                        i += 2;
+                    } else if (second == '0') {
+                        // '_0xxxx' -> unicode character
+                        int code = Integer.parseInt(new String(chars, i + 2, 4), 16);
+                        sb.append((char) code);
+                        i += 6;
+                    } else if ((second >= 'A' && second <= 'Z') || (second >= 'a' && second <= 'z') || (second >= '0' && second <= '9')) {
+                        // normal '.' or '/'
+                        sb.append('.');
+                        i++;
+                    } else if (second == '_') {
+                        if (i + 2 == chars.length) {
+                            // Ending with "__", which is a possible long name
+                            break;
+                        }
+                        char third = chars[i + 2];
+                        if (third == '0' || third == '1') {
+                            // normal '.' or '/' followed by '_' or unicode character
+                            sb.append('.');
+                            i++;
+                        } else if ((third >= 'A' && third <= 'Z') || (third >= 'a' && third <= 'z') || (third >= '0' && third <= '9') || third == '_') {
+                            // "__" is for long name, the end of class name
+                            break;
+                        }
+                    }
+                }
+            }
+            // find the end of the class name, that is, the last '.'
+            int lastDot = sb.lastIndexOf(".");
+            if (lastDot == -1) {
+                // should not happen
+                return null;
+            }
+            return sb.substring(0, lastDot);
+        } catch (IndexOutOfBoundsException e) {
+            // bad jni name?
+            return null;
+        }
+    }
+
+    /**
+     * Enumerates all JNI exported methods in the given library and registers them with the specified class loader.
+     *
+     * @param handle      the handle of the library, as returned by {@link DlExtLibraryLoader#dlopen}
+     * @param elfData     the file content of the native library, should be the same as the one passed to {@link DlExtLibraryLoader#dlopen}
+     * @param classLoader the class loader to register the methods with
+     * @return a summary of the registration process
+     */
+    public static RegistrationSummary registerNativeMethodsForLibrary(
+            long handle,
+            @NonNull byte[] elfData,
+            @NonNull ClassLoader classLoader
+    ) {
+        Objects.requireNonNull(elfData, "elfData");
+        Objects.requireNonNull(classLoader, "classLoader");
+        if (handle == 0) {
+            throw new IllegalArgumentException("library handle is null");
+        }
+        // enumerate all exported symbols in the library starting with "Java_"
+        ElfView elfView = new ElfView(ByteBuffer.wrap(elfData));
+        HashSet<String> possibleClassNames = new HashSet<>();
+        for (Map.Entry<String, Long> symbol : elfView.getDynamicSymbols().entrySet()) {
+            if (symbol.getKey().startsWith("Java_")) {
+                String className = getClassNameForJniSymbolName(symbol.getKey());
+                if (className != null) {
+                    possibleClassNames.add(className);
+                } else {
+                    // maybe bug in the library?
+                    throw new IllegalStateException("invalid JNI symbol name: " + symbol.getKey());
+                }
+            }
+        }
+        HashSet<Class<?>> classes = new HashSet<>(possibleClassNames.size());
+        for (String className : possibleClassNames) {
+            try {
+                classes.add(classLoader.loadClass(className));
+            } catch (ClassNotFoundException e) {
+                // ignore
+            }
+        }
+        return findAndRegisterNativeMethods(handle, classes.toArray(new Class<?>[0]));
     }
 
 }
