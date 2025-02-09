@@ -77,6 +77,41 @@ public static long initializeMMKV(@NonNull Context ctx) {
 }
 ```
 
+For native libraries that use passive JNI registration (e.g. `Java_com_example_test_app_TestNativeLoader_nativeMethod`),
+you can call the `NativeRegistrationHelper.registerNativeMethodsForLibrary` method to register the native methods.
+See [TestNativeLoader.java](demo-app/src/main/java/com/example/test/app/TestNativeLoader.java) for the complete example.
+
+`NativeRegistrationHelper.registerNativeMethodsForLibrary` enumerates all the exported symbols in the given ELF shared object,
+and find the corresponding Java methods by the naming convention and register them.
+However, it has higher overheads than the dynamic JNI registration (e.g. `env->RegisterNatives` in the `JNI_OnLoad` callback).
+
+```java
+import dev.tmpfs.libcoresyscall.core.NativeAccess;
+import dev.tmpfs.libcoresyscall.elfloader.DlExtLibraryLoader;
+import dev.tmpfs.libcoresyscall.elfloader.NativeRegistrationHelper;
+
+public static long load(String soname) {
+    byte[] elfData = getElfData(soname);
+    long handle = DlExtLibraryLoader.dlopenExtFromMemory(elfData, soname, DlExtLibraryLoader.RTLD_NOW, 0, 0);
+    if (handle != 0) {
+        // register native methods for the library
+        NativeRegistrationHelper.RegistrationSummary summary =
+                NativeRegistrationHelper.registerNativeMethodsForLibrary(handle, elfData);
+        // do some check with the native registration result
+        Log.d("TestNativeLoader", soname + ": registerNativeMethodsForLibrary: " + summary);
+        long jniOnLoad = DlExtLibraryLoader.dlsym(handle, "JNI_OnLoad");
+        if (jniOnLoad != 0) {
+            long javaVm = NativeAccess.getJavaVM();
+            long ret = NativeAccess.callPointerFunction(jniOnLoad, javaVm, 0);
+            if (ret < 0) {
+                throw new IllegalStateException("JNI_OnLoad failed: " + ret);
+            }
+        }
+    }
+    return handle;
+}
+```
+
 ### Make System Calls
 
 Here is an example of how to make syscalls with the library. It calls the `uname` system call to get the system information.
